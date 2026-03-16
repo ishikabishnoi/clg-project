@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DoveTail</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+
+<body>
+    <div id="landing-page-wrapper">
+        <div class="hero-section">
+            <!-- <div class="hero-image-wrapper">
+            <img src="left side.png" class="hero-img" alt="Scattered Mind">
+        </div> -->
+
+            <div class="hero-text">
+                <h1>STOP JUGGLING</h1>
+                <h2 class="accent-text">START DOVETAILING!</h2>
+                <div class="scroll-indicator">
+                    <span>Scroll to Enter Vault</span>
+                    <div class="arrow">↓</div>
+                </div>
+            </div>
+
+            <!-- <div class="hero-image-wrapper">
+            <img src="right side.png" class="hero-img" alt="Organized Mind">
+        </div> -->
+        </div>
+        <div class="intro-section">
+            <h3 class="intro-lead">Built by students, for the students</h3>
+            <p class="intro-text">
+                Dovetail was born from a simple realization: learning shouldn't feel like a search mission.
+                By merging your lecture playlists, notes, and previous year questions into a single,
+                seamless workflow, we’ve removed the friction from focus.
+            </p>
+            <p class="intro-welcome">Welcome to a more organized way to learn.</p>
+        </div>
+
+
+        <div class="auth-container" id="login-screen">
+            <div class="login-card">
+                <div class="login-visual">
+                    <h1>Welcome to doveTail! ✨</h1>
+                    <p>Log in to access your personalized study vault.</p>
+                </div>
+                <div class="login-form">
+                    <h2>User Login</h2>
+                    <input type="email" id="login-email" placeholder="Email Address">
+                    <input type="password" id="login-password" placeholder="Password">
+                    <button id="login-btn" class="login-btn">LOGIN</button>
+                    <p style="margin-top:15px; font-size: 0.8rem; color: #94a3b8;">
+                        New user? <a href="javascript:void(0)" id="toggle-auth-link"
+                            style="color: #6a5af9; font-weight: bold;">Create Account</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="setup-screen" class="full-page-center hidden">
+        <div class="glass-card">
+            <h1>Setup your profile 📚</h1>
+            <input type="email" id="signup-email" placeholder="Email Address">
+            <input type="password" id="signup-password" placeholder="Create Password">
+
+            <div class="setup-row">
+                <select id="signup-course">
+                    <option value="">Select Course</option>
+                    <option value="BSc Computer Science">BSc Computer Science</option>
+                    <option value="BCA">BA LLB</option>
+                    <option value="BSc Biotechnology">BSc Biotechnology</option>
+                </select>
+                <select id="signup-semester">
+                    <option value="">Select Semester</option>
+                    <option value="1">Semester 1</option>
+                    <option value="2">Semester 2</option>
+                    <option value="3">Semester 3</option>
+                    <option value="4">Semester 4</option>
+                    <option value="5">Semester 5</option>
+                    <option value="6">Semester 6</option>
+                </select>
+            </div>
+
+            <button onclick="signUpUser()" class="add-btn" style="width:100%;">Enter Vault</button>
+            <p style="font-size: 0.8rem; cursor:pointer;" onclick="toggleAuth()">Back to Login</p>
+        </div>
+    </div>
+
+
+    <div id="dashboard-screen" class="container hidden">
+        <nav class="sidebar">
+            <div class="logo">
+                <h2>DoveTail!</h2>
+            </div>
+
+            <ul>
+                <li class="active" onclick="showSection('dashboard-section')">📊 Dashboard</li>
+                <li onclick="showSection('syllabus-section')">📚 View Syllabus</li>
+                <li onclick="showSection('notes-section')">📝 Skim through Notes</li>
+                <li onclick="showSection('lectures-section')">📺 Binge Lectures</li>
+                <li onclick="showSection('pyq-section')">📄 PYQs</li>
+            </ul>
+        </nav>
+
+        <div class="main-content">
+
+            <div class="top-nav" style="display: flex; justify-content: flex-end; padding: 10px;">
+                <div class="menu-container" style="position: relative;">
+                    <button class="menu-trigger" onclick="toggleMenu()"
+                        style="background:none; border:none; color:white; font-size:24px; cursor:pointer;">⋮</button>
+
+                    <div id="dropdown-menu" class="dropdown-content hidden">
+                        <a href="javascript:void(0)" onclick="showSection('profile-section')">👤 My Profile</a>
+                        <a href="javascript:void(0)" onclick="toggleDarkMode()">🌙 Dark Mode</a>
+                        <a href="javascript:void(0)" onclick="toggleDesktopMode()">🖥️ Desktop Mode</a>
+                        <a href="javascript:void(0)" onclick="showSection('about-section')">ℹ️ About</a>
+                    </div>
+                </div>
+            </div>
+
+            <div id="dashboard-section" class="tab-content">
+                <div class="profile-bar">
+                    <div class="user-meta">
+                        <span class="user-avatar">👤</span>
+                        <div>
+                            <h2 id="user-display-name">Loading...</h2>
+                            <p id="user-display-meta">Course & Semester</p>
+                        </div>
+                    </div>
+                    <button class="logout-btn" onclick="logout()">Logout</button>
+                </div>
+
+                <div class="card task-manager-card">
+                    <div class="task-header">
+                        <h3>📅 Upcoming Deadlines & Tasks</h3>
+                        <div class="task-inputs">
+                            <input type="text" id="task-name" placeholder="Assignment/Task name...">
+                            <input type="date" id="task-date">
+                            <button class="add-btn" onclick="addNewTask()">+ Add Task</button>
+                        </div>
+                    </div>
+                    <table class="task-table">
+                        <thead>
+                            <tr>
+                                <th>Task Name</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="task-list-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="syllabus-section" class="tab-content hidden">
+                <h1>Syllabus Planner 📚</h1>
+                <div class="glass-card-no-center">
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                        <select id="subject-select" style="flex: 2;">
+                            <option value="">Select Subject</option>
+                            <option value="English Language and Professional Communication-I">English Language
+                                and
+                                Professional Communication-I</option>
+                            <option value="Applied Mathematics-I">Applied Mathematics-I</option>
+                            <option value="Applied Physics">Applied Physics</option>
+                            <option value="Computer Fundamentals">Computer Fundamentals</option>
+                            <option value="English Language and Professional Communication-II">English Language
+                                and
+                                Professional Communication-II</option>
+                            <option value="Applied Mathematics-II">Applied Mathematics-II</option>
+                            <option value="Basic Electronics">Basic Electronics</option>
+                            <option value="Programming in C">Programming in C</option>
+                            <option value="Discrete Structures">Discrete Structures</option>
+                            <option value="Switching Theory & Logic Design">Switching Theory & Logic Design
+                            </option>
+                            <option value="Data Structures in C">Data Structures in C</option>
+                            <option value="Computer Oriented Numeric Techniques">Computer Oriented Numeric
+                                Techniques
+                            </option>
+                            <option value="Computer Organisations">Computer Organisations</option>
+                            <option value="OOP Through C++">OOP Through C++</option>
+                            <option value="Data Base Management System">Data Base Management System</option>
+                            <option value="System Software">System Software</option>
+                            <option value="Java Programming">Java Programming</option>
+                            <option value="Computer Networks">Computer Networks</option>
+                            <option value="System Analysis & Design">System Analysis & Design</option>
+                        </select>
+                        <input type="number" id="months-input-roadmap" placeholder="Months?" style="flex: 1;">
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="add-btn" style="flex: 1; background: #334155;"
+                            onclick="handleSyllabusAction('view')">👁️ View</button>
+                        <button class="add-btn" style="flex: 1;" onclick="handleSyllabusAction('plan')">📅 Generate
+                            Plan</button>
+                    </div>
+                    <div id="roadmap-container" style="margin-top:30px;"></div>
+                </div>
+            </div>
+
+            <div id="notes-section" class="tab-content hidden">
+                <h1>Subject Wise Notes 📝</h1>
+                <div class="glass-card-no-center">
+                    <h3>Upload New Study Material</h3>
+                    <div style="display: flex; gap: 10px; margin: 15px 0;">
+                        <input type="text" id="note-subject" placeholder="Subject Name" style="flex: 2;">
+                        <input type="file" id="note-file" style="flex: 2;">
+                    </div>
+                    <button class="add-btn" onclick="addNoteLink()" style="width:100%;">Add to Vault</button>
+                    <ul id="notes-list" style="list-style: none; margin-top: 15px;"></ul>
+                </div>
+            </div>
+
+            <div id="lectures-section" class="tab-content hidden">
+                <h1>Binge Lectures 📺</h1>
+                <div class="glass-card-no-center">
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                        <input type="text" id="playlist-title" placeholder="Topic Name" style="flex: 2;">
+                        <input type="text" id="playlist-url" placeholder="YouTube Link" style="flex: 3;">
+                        <button class="add-btn" onclick="addPlaylist()">Save</button>
+                    </div>
+                    <div id="playlist-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    </div>
+                </div>
+            </div>
+
+            <div id="pyq-section" class="tab-content hidden">
+                <h1>Previous Year Questions 📄</h1>
+                <div class="glass-card-no-center">
+                    <h3>Question Paper Drive</h3>
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <input type="text" placeholder="Paste Google Drive Link..." style="flex: 4;">
+                        <button class="add-btn" style="flex: 1;">Save Link</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="about-section" class="tab-content hidden">
+                <h1>About DoveTail! ✨</h1>
+                <div class="glass-card-no-center">
+                    <p>Dovetail was born from a simple realization: learning shouldn't feel like a search mission.</p>
+                    <h3>Future Updates:</h3>
+                    <ul>
+                        <li>Real-time Collaboration with classmates</li>
+                        <li>AI-powered Study Summaries</li>
+                        <li>Mobile App Launch</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="profile-section" class="tab-content hidden">
+                <h1>My Study Vault 👤</h1>
+                <div class="profile-grid">
+                    <div class="card">
+                        <h3>⭐ Saved Playlists</h3>
+                        <div id="saved-lectures"></div>
+                    </div>
+                    <div class="card">
+                        <h3>📄 My Notes</h3>
+                        <div id="saved-notes"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="script.js"></script>
+</body>
+
+</html>
