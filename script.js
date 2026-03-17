@@ -68,6 +68,21 @@ window.loginUser = async function loginUser() {
         showDashboard();
     }
 }
+// LOGOUT FUNCTION
+window.toggleMenu = function () {
+    const menu = document.getElementById('dropdown-menu');
+    menu.classList.toggle('hidden');
+}
+
+// This part ensures the menu closes if you click anywhere else on the screen
+window.addEventListener('click', function (event) {
+    if (!event.target.matches('.menu-trigger')) {
+        const dropdown = document.getElementById("dropdown-menu");
+        if (dropdown && !dropdown.classList.contains('hidden')) {
+            dropdown.classList.add('hidden');
+        }
+    }
+});
 
 // Global array to store topics - pulls from memory if it exists
 let topics = JSON.parse(localStorage.getItem('studyTopics')) || [];
@@ -208,26 +223,21 @@ window.onload = function () {
     }
 }
 window.showSection = function (sectionId) {
-    // 1. Get all elements with the class 'tab-content'
     const sections = document.querySelectorAll('.tab-content');
+    sections.forEach(s => s.classList.add('hidden'));
 
-    // 2. Hide every single one of them
-    sections.forEach(sec => {
-        sec.classList.add('hidden');
-    });
-
-    // 3. Show the ONE section the user requested
     const target = document.getElementById(sectionId);
     if (target) {
         target.classList.remove('hidden');
-    } else {
-        console.error("Could not find section:", sectionId);
+
+        // If they click profile, refresh the data
+        if (sectionId === 'profile-section') {
+            updateProfileVault();
+        }
     }
 
-    // 4. (Optional) Manage Sidebar Active State
-    const tabs = document.querySelectorAll('.sidebar li');
-    tabs.forEach(tab => tab.classList.remove('active'));
-
+    // Close dropdown menu if open
+    document.getElementById('dropdown-menu').classList.add('hidden');
 }
 
 //save function for Notes
@@ -240,41 +250,54 @@ function saveNotes() {
 let savedNotes = JSON.parse(localStorage.getItem('studyNotesVault')) || [];
 
 window.addNoteLink = async function addNoteLink() {
-    console.log("Button clicked!");
     const subject = document.getElementById('note-subject').value;
     const fileInput = document.getElementById('note-file');
-    const isPublic = document.getElementById('is-public-check')?.checked || false;
 
     if (!subject || fileInput.files.length === 0) return alert("Select a file first!");
 
     const file = fileInput.files[0];
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Math.random()}.${fileExt}`;
-    const filePath = `${fileName}`;
+    const fileName = `${Date.now()}_${file.name}`; // Better naming than Math.random()
 
-    // 1. Upload to the bucket you just created
-    let { error: uploadError } = await supabase.storage
-        .from('notes_files') // THIS MUST MATCH THE BUCKET NAME
-        .upload(filePath, file);
+    try {
+        // 1. Upload to Storage
+        let { error: uploadError } = await supabase.storage
+            .from('notes_files')
+            .upload(fileName, file);
 
-    if (uploadError) return alert("Upload failed: " + uploadError.message);
+        if (uploadError) throw uploadError;
 
-    // 2. Insert into the table (Make sure this name matches your DB exactly)
-    const { error } = await supabase
-        .from('notes_vault')
-        .insert([{
-            subject: subject,
-            file_name: file.name,
-            file_url: filePath,
-            user_id: currentUser.id,
-            is_public: isPublic
-        }]);
+        // 2. GET THE REAL PUBLIC URL (This is what was missing!)
+        const { data: urlData } = supabase.storage
+            .from('notes_files')
+            .getPublicUrl(fileName);
 
-    if (error) {
-        alert("DB Error: " + error.message);
-    } else {
+        const publicUrl = urlData.publicUrl;
+
+        // 3. Insert into Table (Force is_public to true)
+        const { error: dbError } = await supabase
+            .from('notes_vault')
+            .insert([{
+                subject: subject,
+                file_name: file.name,
+                file_url: publicUrl, // Saving the full https:// link
+                user_id: currentUser.id,
+                is_public: true // Force public
+            }]);
+
+        if (dbError) throw dbError;
+
         alert("Note saved to Vault! ✨");
+
+        // Clear inputs
+        document.getElementById('note-subject').value = '';
+        fileInput.value = '';
+
+        // 4. Refresh both views
         fetchNotesFromCloud();
+        if (typeof updateProfileVault === "function") updateProfileVault();
+
+    } catch (err) {
+        alert("Error: " + err.message);
     }
 }
 
@@ -312,6 +335,28 @@ window.deleteNote = function deleteNote(index) {
     }
 }
 
+/*this function updates the Profile Section with the latest notes. */
+window.updateProfileVault = async function () {
+    // Fetch the notes from the DB to make sure the profile is up to date
+    const { data: notes, error } = await supabase
+        .from('notes_vault')
+        .select('*')
+        .eq('user_id', currentUser.id);
+
+    if (error) return console.error(error);
+
+    const savedNotesContainer = document.getElementById('saved-notes');
+    if (savedNotesContainer) {
+        savedNotesContainer.innerHTML = notes.map(n => `
+            <div class="card" style="margin-bottom: 10px; border-left: 4px solid #6a5af9;">
+                <small>${n.subject}</small>
+                <p><a href="${n.file_url}" target="_blank" style="color: #6a5af9; font-weight:bold;">📄 Open Note</a></p>
+            </div>
+        `).join('') || '<p style="font-size:0.8rem; color:#94a3b8;">No notes saved yet.</p>';
+    }
+}
+
+
 const originalShowSection = showSection;
 showSection = function (sectionId) {
     originalShowSection(sectionId);
@@ -331,48 +376,42 @@ function getYoutubeID(url) {
     return null;
 }
 
-window.addPlaylist = async function () {
+window.addPlaylist = function () {
     const title = document.getElementById('playlist-title').value;
     const url = document.getElementById('playlist-url').value;
-    const videoId = getYoutubeID(url);
 
-    if (!videoId) return alert("Please enter a valid YouTube link!");
+    if (!title || !url.includes('youtube.com')) {
+        alert("Please enter a valid Topic Name and YouTube link!");
+        return;
+    }
 
-    // Instead of localStorage, we send to Supabase 'lectures' table
-    const { data, error } = await supabase
-        .from('lectures')
-        .insert([
-            {
-                title: title,
-                url: url,
-                thumbnail: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
-                user_id: currentUser.id, // Private by default
-                is_public: true // For now, let's keep it public to test the feed
-            }
-        ]);
+    const playlist = { title, url, id: Date.now() };
 
-    if (error) console.error(error);
-    else renderLectures();
-}
+    // 1. Save to LocalStorage
+    let playlists = JSON.parse(localStorage.getItem('userPlaylists')) || [];
+    playlists.push(playlist);
+    localStorage.setItem('userPlaylists', JSON.stringify(playlists));
+
+    // 2. Clear inputs and refresh display
+    document.getElementById('playlist-title').value = '';
+    document.getElementById('playlist-url').value = '';
+    renderPlaylists();
+};
 
 function renderPlaylists() {
     const container = document.getElementById('playlist-container');
-    if (!container) return;
+    const playlists = JSON.parse(localStorage.getItem('userPlaylists')) || [];
 
-    container.innerHTML = '';
-
-    savedPlaylists.forEach((item, index) => {
-        container.innerHTML += `
-            <div style="background: #fdf2f8; border: 1px solid #fbcfe8; padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <strong style="display: block; color: #333;">${item.title}</strong>
-                    <a href="${item.url}" target="_blank" style="color: #6a5af9; text-decoration: none; font-size: 0.85rem;">Click to watch on YouTube ↗</a>
-                </div>
-                <button onclick="deletePlaylist(${index})" style="background: none; border: none; color: #ff7eb3; cursor: pointer; font-size: 1.1rem;">🗑️</button>
-            </div>
-        `;
-    });
+    container.innerHTML = playlists.map(p => `
+        <div class="card" style="background: white; color: black; padding: 15px; border-radius: 12px;">
+            <h4>${p.title}</h4>
+            <a href="${p.url}" target="_blank" style="color: #6a5af9; font-size: 0.8rem;">Click to watch on YouTube ↗</a>
+        </div>
+    `).join('');
 }
+
+// Call this once when the page loads
+renderPlaylists();
 
 window.addEventListener('load', renderPlaylists);
 
@@ -571,14 +610,26 @@ window.toggleMenu = function () {
     document.getElementById('dropdown-menu').classList.toggle('hidden');
 }
 
+// 1. Dark Mode / Light Mode Logic
 window.toggleDarkMode = function () {
-    document.body.classList.toggle('light-mode'); // Assuming your CSS is Dark by default
-}
+    // We toggle a 'light-mode' class on the body
+    document.body.classList.toggle('light-mode');
 
+    // Optional: Save preference
+    const isLight = document.body.classList.contains('light-mode');
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+};
+
+// 2. Desktop / Mobile View Logic
 window.toggleDesktopMode = function () {
-    // This forces the viewport width or toggles a class on the container
-    document.querySelector('.container').classList.toggle('forced-desktop');
-}
+    // We toggle a 'mobile-view' class on the container
+    const container = document.querySelector('.container');
+    container.classList.toggle('mobile-view');
+
+    // Update button text or icon if you want
+    const status = container.classList.contains('mobile-view') ? 'Mobile' : 'Desktop';
+    console.log("View Mode:", status);
+};
 
 // Close menu if user clicks outside
 window.onclick = function (event) {
@@ -589,3 +640,18 @@ window.onclick = function (event) {
         }
     }
 }
+
+// Function to update the Profile Section with current user data
+function updateProfileVault() {
+    const userData = JSON.parse(localStorage.getItem('currentUser'));
+    if (userData) {
+        // Update the Profile Section Header
+        const profileHeader = document.querySelector('#profile-section h1');
+        profileHeader.innerText = `${userData.email.split('@')[0]}'s Study Vault 👤`;
+
+        // Sync the playlists and notes from the main sections to the profile cards
+        document.getElementById('saved-lectures').innerHTML = document.getElementById('playlist-container').innerHTML;
+        document.getElementById('saved-notes').innerHTML = document.getElementById('notes-list').innerHTML;
+    }
+}
+

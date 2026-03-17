@@ -205,6 +205,8 @@
             <div id="notes-section" class="tab-content hidden">
                 <h1>Subject Wise Notes 📝</h1>
                 <div class="glass-card-no-center">
+                    <ul id="notes-list" style="list-style: none; margin-top: 20px; padding: 0;">
+                    </ul>
                     <h3>Upload New Study Material</h3>
                     <div style="display: flex; gap: 10px; margin: 15px 0;">
                         <input type="text" id="note-subject" placeholder="Subject Name" style="flex: 2;">
@@ -250,6 +252,21 @@
                         <li>Mobile App Launch</li>
                     </ul>
                 </div>
+            </div>
+
+            <div id="dropdown-menu" class="dropdown-content hidden">
+                <a href="javascript:void(0)" onclick="showSection('profile-section')">👤 My Profile</a>
+
+                <a href="javascript:void(0)" onclick="toggleDarkMode()">
+                    🌙 Dark Mode <input type="checkbox" id="dark-mode-check" checked style="pointer-events: none;">
+                </a>
+
+                <a href="javascript:void(0)" onclick="toggleDesktopMode()">
+                    🖥️ Desktop Mode <input type="checkbox" id="desktop-mode-check" checked
+                        style="pointer-events: none;">
+                </a>
+
+                <a href="javascript:void(0)" onclick="showSection('about-section')">ℹ️ About</a>
             </div>
 
             <div id="profile-section" class="tab-content hidden">

@@ -585,3 +585,42 @@ select {
 .hidden {
     display: none !important;
 }
+
+/* FIX: Gap between title and blocks */
+.tab-content h1 {
+    margin-bottom: 30px;
+    /* Adds breathing room below the title */
+}
+
+.profile-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    /* Adds space between the two blocks */
+    margin-top: 20px;
+}
+
+/* DARK/LIGHT MODE STYLES */
+body.light-mode {
+    background-color: #f8fafc;
+    color: #1e293b;
+}
+
+body.light-mode .glass-card-no-center,
+body.light-mode .card {
+    background: rgba(255, 255, 255, 0.8);
+    color: #1e293b;
+    border: 1px solid #e2e8f0;
+}
+
+/* MOBILE VIEW SIMULATION */
+.container.mobile-view {
+    max-width: 430px;
+    /* Standard mobile width */
+    margin: 0 auto;
+    border: 10px solid #334155;
+    /* Phone border effect */
+    border-radius: 30px;
+    height: 90vh;
+    overflow-y: auto;
+}
