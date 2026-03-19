@@ -64,8 +64,9 @@ window.loginUser = async function loginUser() {
             window.userSemester = "New";
         }
 
-        fetchPlaylistsFromCloud();
-        fetchNotesFromCloud();
+        await fetchPlaylistsFromCloud();
+        await fetchNotesFromCloud();
+        await fetchPYQsFromCloud();
         showDashboard();
     }
 }
@@ -564,26 +565,26 @@ async function fetchNotesFromCloud() {
 }
 
 supabase.auth.onAuthStateChange((event, session) => {
-    if (event === 'SIGNED_IN' && session) {
-        currentUser = session.user;  //check if user is logged in and set the global variable
+    if (session) {
+        currentUser = session.user;
+        // Trigger the Global Sync
         fetchPlaylistsFromCloud();
+        fetchPYQsFromCloud();
+        fetchNotesFromCloud();
     }
 });
 
 async function fetchPlaylistsFromCloud() {
-    if (!currentUser) return;
 
     const { data, error } = await supabase
         .from('playlists')
-        .select('*')
-        .eq('user_id', currentUser.id); // Only get YOUR playlists
+        .select('*'); // This pulls EVERYTHING from the table
 
     if (error) {
         console.error("Error fetching playlists:", error);
     } else {
-        // CRITICAL: Save cloud data to LocalStorage so renderPlaylists() can see it
         localStorage.setItem('userPlaylists', JSON.stringify(data));
-        renderPlaylists(); // Now tell the UI to draw them
+        renderPlaylists();
     }
 }
 
@@ -607,7 +608,6 @@ window.handleSyllabusAction = async function (mode) {
         return;
     }
 
-    // --- THE FIX: SPLIT THE CHAPTER BLOCK ---
     let allTopics = [];
     rawData.forEach(row => {
         // Splits by commas OR new lines, then cleans up extra spaces
@@ -843,3 +843,16 @@ window.deletePYQ = function () {
     }
 };
 
+async function fetchPYQsFromCloud() {
+    const { data, error } = await supabase
+        .from('pyqs')
+        .select('url')
+        .order('created_at', { ascending: false }); // Get all links, newest first
+
+    if (data && data.length > 0) {
+        // You can either show the latest one or a list. 
+        // For now, let's keep the latest one visible globally:
+        localStorage.setItem('pyq_drive_link', data[0].url);
+        renderPYQ();
+    }
+}

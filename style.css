@@ -26,11 +26,6 @@ body {
     /* Prevents side-scrolling */
 }
 
-
-/* .hidden {
-    display: none !important;
-} */
-
 /* 3. THE MASTER LAYOUT */
 .container {
     display: flex;
