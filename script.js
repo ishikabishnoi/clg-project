@@ -65,6 +65,7 @@ window.loginUser = async function loginUser() {
         }
 
         fetchPlaylistsFromCloud();
+        fetchNotesFromCloud();
         showDashboard();
     }
 }
@@ -72,6 +73,18 @@ window.loginUser = async function loginUser() {
 window.toggleMenu = function () {
     const menu = document.getElementById('dropdown-menu');
     menu.classList.toggle('hidden');
+}
+
+window.logoutUser = async function () {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+        alert("Error logging out: " + error.message);
+    } else {
+        // Reset local state
+        currentUser = null;
+        // Redirect to landing page or reload
+        location.reload();
+    }
 }
 
 // This part ensures the menu closes if you click anywhere else on the screen
@@ -139,24 +152,42 @@ window.calculatePlan = function calculatePlan() {
 }
 
 
-window.downloadPlanner = function downloadPlanner() {
+window.downloadPlanner = function () {
     const element = document.getElementById('roadmap-container');
     const subject = document.getElementById('subject-select').value;
 
-    if (!element.innerHTML || element.innerHTML.includes("Fetching")) {
+    if (!element || !element.innerHTML || element.innerHTML.includes("Fetching")) {
         return alert("Generate a plan first!");
     }
 
-    const options = {
-        margin: [10, 10],
-        filename: `${subject}_Study_Plan.pdf`,
+    // 1. Add a class to force PDF-friendly styles (White bg, Black text)
+    // This uses the CSS class we discussed earlier
+    element.classList.add('pdf-export-mode');
+
+    const opt = {
+        margin: [0.5, 0.5],
+        filename: `${subject.replace(/\s+/g, '_')}_Study_Plan.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, backgroundColor: '#020617' },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        html2canvas: {
+            scale: 2,
+            useCORS: true,
+            letterRendering: true,
+            scrollY: 0
+        },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
     };
 
-    html2pdf().set(options).from(element).save();
-}
+    // 2. Use the "from" method with a promise to ensure rendering is captured
+    html2pdf().set(opt).from(element).save().then(() => {
+        // 3. Clean up: Remove the PDF class so your dashboard stays dark/cool
+        element.classList.remove('pdf-export-mode');
+        console.log("PDF Downloaded successfully");
+    }).catch(err => {
+        element.classList.remove('pdf-export-mode');
+        console.error("PDF Error:", err);
+        alert("Failed to generate PDF. Check console.");
+    });
+};
 
 
 // 4. TOPIC TRACKER LOGIC
@@ -222,23 +253,34 @@ window.onload = function () {
         totalEl.innerText = savedTotal;
     }
 }
+
+
 window.showSection = function (sectionId) {
+    // 1. Hide all sections
     const sections = document.querySelectorAll('.tab-content');
     sections.forEach(s => s.classList.add('hidden'));
 
+    // 2. Show the target section
     const target = document.getElementById(sectionId);
     if (target) {
         target.classList.remove('hidden');
 
-        // If they click profile, refresh the data
+        // 3. RUN SYNC LOGIC BASED ON THE SECTION
+        if (sectionId === 'notes-section') {
+            fetchNotesFromCloud();
+            renderNotes();
+        }
+
         if (sectionId === 'profile-section') {
-            updateProfileVault();
+            // This is the "Study Vault" sync we just built
+            if (typeof syncVault === "function") syncVault();
         }
     }
 
-    // Close dropdown menu if open
-    document.getElementById('dropdown-menu').classList.add('hidden');
-}
+    // 4. Close the menu automatically after clicking
+    const menu = document.getElementById('dropdown-menu');
+    if (menu) menu.classList.add('hidden');
+};
 
 //save function for Notes
 function saveNotes() {
@@ -303,59 +345,57 @@ window.addNoteLink = async function addNoteLink() {
 
 function renderNotes() {
     const list = document.getElementById('notes-list');
-    const emptyMsg = document.getElementById('no-notes');
     if (!list) return;
-
     list.innerHTML = '';
 
-    if (savedNotes.length === 0) {
-        if (emptyMsg) emptyMsg.style.display = 'block';
-    } else {
-        if (emptyMsg) emptyMsg.style.display = 'none';
-
-        savedNotes.forEach((note, index) => {
-            list.innerHTML += `
-                <li style="background: #f8f9ff; padding: 15px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #6a5af9;">
-                    <div>
-                        <strong style="color: #333;">${note.subject}</strong><br>
-                        <span style="font-size: 0.85rem; color: #666;">📄 ${note.fileName}</span>
-                    </div>
-                    <button onclick="deleteNote(${index})" style="background: none; border: none; color: #ff7eb3; cursor: pointer; font-size: 1.2rem;">🗑️</button>
-                </li>
-            `;
-        });
-    }
+    savedNotes.forEach((note) => {
+        list.innerHTML += `
+            <li style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #6a5af9;">
+                <div>
+                    <strong style="color: #fff;">${note.subject}</strong><br>
+                    <span style="font-size: 0.85rem; color: #aaa;">📄 ${note.file_name || 'Note'}</span>
+                </div>
+                <a href="${note.file_url}" target="_blank" style="color: #6a5af9; text-decoration: none; font-size: 0.9rem;">View ↗</a>
+            </li>
+        `;
+    });
 }
 
-window.deleteNote = function deleteNote(index) {
-    if (confirm("Delete this note from your vault?")) {
-        savedNotes.splice(index, 1);
-        localStorage.setItem('studyNotesVault', JSON.stringify(savedNotes));
-        renderNotes();
-    }
-}
+// This only hides it for the CURRENT user's browser
+window.hideFromProfile = function (id, type) {
+    if (!confirm(`Hide this ${type} from your profile view? (It will remain in the public vault)`)) return;
 
-/*this function updates the Profile Section with the latest notes. */
+    // Save the hidden ID to localStorage
+    let hiddenItems = JSON.parse(localStorage.getItem('hidden_items')) || [];
+    hiddenItems.push(id);
+    localStorage.setItem('hidden_items', JSON.stringify(hiddenItems));
+
+    // Refresh the profile view
+    updateProfileVault();
+};
+
 window.updateProfileVault = async function () {
-    // Fetch the notes from the DB to make sure the profile is up to date
-    const { data: notes, error } = await supabase
-        .from('notes_vault')
-        .select('*')
-        .eq('user_id', currentUser.id);
+    const hiddenItems = JSON.parse(localStorage.getItem('hidden_items')) || [];
 
+    // 1. Fetch ALL notes from Supabase
+    const { data: notes, error } = await supabase.from('notes_vault').select('*');
     if (error) return console.error(error);
 
     const savedNotesContainer = document.getElementById('saved-notes');
     if (savedNotesContainer) {
-        savedNotesContainer.innerHTML = notes.map(n => `
-            <div class="card" style="margin-bottom: 10px; border-left: 4px solid #6a5af9;">
-                <small>${n.subject}</small>
-                <p><a href="${n.file_url}" target="_blank" style="color: #6a5af9; font-weight:bold;">📄 Open Note</a></p>
+        // FILTER: Only show notes that ARE NOT in the hiddenItems list
+        const visibleNotes = notes.filter(n => !hiddenItems.includes(n.id));
+
+        savedNotesContainer.innerHTML = visibleNotes.map(n => `
+            <div class="card" style="margin-bottom: 10px; border-left: 4px solid #6a5af9; position: relative;">
+                <button onclick="hideFromProfile('${n.id}', 'note')" 
+                        style="position: absolute; right: 10px; top: 10px; background:none; border:none; cursor:pointer;">🗑️</button>
+                <small style="color: #94a3b8;">${n.subject}</small>
+                <p><a href="${n.file_url}" target="_blank" style="color: #6a5af9; font-weight:bold; text-decoration:none;">📄 Open</a></p>
             </div>
-        `).join('') || '<p style="font-size:0.8rem; color:#94a3b8;">No notes saved yet.</p>';
+        `).join('') || '<p style="font-size:0.8rem; color:#94a3b8;">Vault is empty.</p>';
     }
 }
-
 
 const originalShowSection = showSection;
 showSection = function (sectionId) {
@@ -364,7 +404,7 @@ showSection = function (sectionId) {
         renderNotes();
     }
 }
-//let savedPlaylists = JSON.parse(localStorage.getItem('studyPlaylists')) || [];
+
 
 function getYoutubeID(url) {
     // This looks for 'v=' (video) or 'list=' (playlist)
@@ -402,13 +442,31 @@ function renderPlaylists() {
     const container = document.getElementById('playlist-container');
     const playlists = JSON.parse(localStorage.getItem('userPlaylists')) || [];
 
+    if (playlists.length === 0) {
+        container.innerHTML = '<p style="color: #64748b; grid-column: 1/-1;">No playlists saved yet.</p>';
+        return;
+    }
+
     container.innerHTML = playlists.map(p => `
-        <div class="card" style="background: white; color: black; padding: 15px; border-radius: 12px;">
-            <h4>${p.title}</h4>
-            <a href="${p.url}" target="_blank" style="color: #6a5af9; font-size: 0.8rem;">Click to watch on YouTube ↗</a>
-        </div>
-    `).join('');
+    <div class="card" style="background: white; color: black; padding: 15px; border-radius: 12px; position: relative;">
+        <h4 style="margin-right: 10px;">${p.title}</h4>
+        <a href="${p.url}" target="_blank" style="color: #6a5af9; font-size: 0.8rem; font-weight: bold;">Watch on YouTube ↗</a>
+    </div>
+`).join('');
 }
+
+// This only hides it for the CURRENT user's browser
+window.hideFromProfile = function (id, type) {
+    if (!confirm(`Hide this ${type} from your profile view? (It will remain in the public vault)`)) return;
+
+    // Save the hidden ID to localStorage
+    let hiddenItems = JSON.parse(localStorage.getItem('hidden_items')) || [];
+    hiddenItems.push(id);
+    localStorage.setItem('hidden_items', JSON.stringify(hiddenItems));
+
+    // Refresh the profile view
+    updateProfileVault();
+};
 
 // Call this once when the page loads
 renderPlaylists();
@@ -460,14 +518,26 @@ window.toggleAuth = function () {
 }
 
 async function fetchNotesFromCloud() {
+    if (!currentUser) return; // Safety check
+
     const { data, error } = await supabase
-        .from('notes')
+        .from('notes_vault') // FIXED: Matches your addNoteLink table name
         .select('*')
-        // Filter: (user_id is mine) OR (is_public is true)
         .or(`user_id.eq.${currentUser.id},is_public.eq.true`);
 
+    if (error) {
+        console.error("Fetch error:", error.message);
+        return;
+    }
+
     if (data) {
-        savedNotes = data;
+        savedNotes = data.map(n => ({
+            subject: n.subject,
+            fileName: n.file_name,
+            file_url: n.file_url,
+            id: n.id
+        }));
+
         renderNotes();
     }
 }
@@ -541,7 +611,13 @@ window.handleSyllabusAction = async function (mode) {
         });
     }
     if (mode === 'plan') {
-        document.getElementById('download-btn').style.display = 'block';
+        const btn = document.getElementById('download-btn');
+        if (btn) {
+            btn.style.display = 'block'; // Now it will find the ID!
+        }
+    } else {
+        // Hide it if they are just "viewing" the list
+        document.getElementById('download-btn').style.display = 'none';
     }
 }
 
@@ -581,14 +657,22 @@ window.addNewTask = function () {
 
 function renderTasks() {
     const tbody = document.getElementById('task-list-body');
+    if (!tbody) return; // Safety check
+
     const tasks = JSON.parse(localStorage.getItem(getTaskKey())) || [];
+
+    if (tasks.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; opacity:0.5;">No pending tasks! 🍵</td></tr>';
+        return;
+    }
 
     tbody.innerHTML = tasks.map(t => `
         <tr>
-            <td>${t.name}</td>
-            <td>${t.date}</td>
-            <td>Active</td>
-            <td><button onclick="deleteTask(${t.id})">🗑️</button></td>
+            <td style="color: white;">${t.name}</td>
+            <td style="color: #94a3b8;">${t.date}</td>
+            <td>
+                <button onclick="deleteTask(${t.id})" style="background: none; border: none; cursor: pointer; font-size: 1.2rem;">🗑️</button>
+            </td>
         </tr>
     `).join('');
 }
@@ -654,4 +738,60 @@ function updateProfileVault() {
         document.getElementById('saved-notes').innerHTML = document.getElementById('notes-list').innerHTML;
     }
 }
+
+
+window.logoutUser = async function () {
+    await supabase.auth.signOut();
+    location.reload(); // Takes them back to the landing page
+}
+
+
+window.deleteTask = function (id) {
+    if (!confirm("Are you sure you want to remove this task?")) return;
+
+    // Get the correct key for this specific user
+    const key = getTaskKey();
+    // Pull the current tasks from Local Storage
+    let currentTasks = JSON.parse(localStorage.getItem(key)) || [];
+    // Filter out the task that matches the ID we clicked
+    const updatedTasks = currentTasks.filter(task => task.id !== id);
+    //  Save the new list back to Local Storage
+    localStorage.setItem(key, JSON.stringify(updatedTasks));
+
+    renderTasks();
+};
+
+window.savePYQLink = function () {
+    const link = document.getElementById('pyq-link-input').value;
+    if (!link) return alert("Paste a link first!");
+
+    localStorage.setItem('pyq_drive_link', link);
+    renderPYQ();
+    alert("Drive link synced! 🔗");
+};
+
+function renderPYQ() {
+    const link = localStorage.getItem('pyq_drive_link');
+    const display = document.getElementById('pyq-display');
+    if (!display) return;
+
+    if (link) {
+        display.innerHTML = `
+            <div class="card" style="background: rgba(106, 90, 249, 0.1); border: 1px dashed #6a5af9; padding: 15px; text-align: center; margin-top:10px;">
+                <p style="font-size: 0.8rem; margin-bottom: 10px;">Drive Folder Connected</p>
+                <a href="${link}" target="_blank" style="color: #6a5af9; font-weight: bold; text-decoration: none; font-size: 0.9rem;">📂 Open Drive</a>
+            </div>
+        `;
+    } else {
+        display.innerHTML = '<p style="color: #64748b; font-size: 0.8rem;">No Drive link connected.</p>';
+    }
+}
+
+window.deletePYQ = function () {
+    if (confirm("Disconnect the Drive link?")) {
+        localStorage.removeItem('pyq_drive_link');
+        document.getElementById('pyq-link-input').value = '';
+        renderPYQ();
+    }
+};
 

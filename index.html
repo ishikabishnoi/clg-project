@@ -13,11 +13,11 @@
     <div id="landing-page-wrapper">
         <div class="hero-section">
             <!-- <div class="hero-image-wrapper">
-            <img src="left side.png" class="hero-img" alt="Scattered Mind">
-        </div> -->
+                <img src="left-side.png" class="hero-img">
+            </div> -->
 
             <div class="hero-text">
-                <h1>STOP JUGGLING</h1>
+                <h1>STOP JUGGLING.</h1>
                 <h2 class="accent-text">START DOVETAILING!</h2>
                 <div class="scroll-indicator">
                     <span>Scroll to Enter Vault</span>
@@ -26,38 +26,41 @@
             </div>
 
             <!-- <div class="hero-image-wrapper">
-            <img src="right side.png" class="hero-img" alt="Organized Mind">
-        </div> -->
+                <img src="right-side.png" class="hero-img">
+            </div> -->
         </div>
-        <div class="intro-section">
-            <h3 class="intro-lead">Built by students, for the students</h3>
-            <p class="intro-text">
-                Dovetail was born from a simple realization: learning shouldn't feel like a search mission.
-                By merging your lecture playlists, notes, and previous year questions into a single,
-                seamless workflow, we’ve removed the friction from focus.
-            </p>
-            <p class="intro-welcome">Welcome to a more organized way to learn.</p>
-        </div>
+    </div>
 
 
-        <div class="auth-container" id="login-screen">
-            <div class="login-card">
-                <div class="login-visual">
-                    <h1>Welcome to doveTail! ✨</h1>
-                    <p>Log in to access your personalized study vault.</p>
-                </div>
-                <div class="login-form">
-                    <h2>User Login</h2>
-                    <input type="email" id="login-email" placeholder="Email Address">
-                    <input type="password" id="login-password" placeholder="Password">
-                    <button id="login-btn" class="login-btn">LOGIN</button>
-                    <p style="margin-top:15px; font-size: 0.8rem; color: #94a3b8;">
-                        New user? <a href="javascript:void(0)" id="toggle-auth-link"
-                            style="color: #6a5af9; font-weight: bold;">Create Account</a>
-                    </p>
-                </div>
+    <div class="intro-section">
+        <h3 class="intro-lead">Built by students, for the students</h3>
+        <p class="intro-text">
+            Dovetail was born from a simple realization: learning shouldn't feel like a search mission.
+            By merging your lecture playlists, notes, and previous year questions into a single,
+            seamless workflow, we’ve removed the friction from focus.
+        </p>
+        <p class="intro-welcome">Welcome to a more organized way to learn.</p>
+    </div>
+
+
+    <div class="auth-container" id="login-screen">
+        <div class="login-card">
+            <div class="login-visual">
+                <h1>Welcome to doveTail!</h1>
+                <p>Log in to access your personalized study vault.</p>
+            </div>
+            <div class="login-form">
+                <h2>User Login</h2>
+                <input type="email" id="login-email" placeholder="Email Address">
+                <input type="password" id="login-password" placeholder="Password">
+                <button id="login-btn" class="login-btn">LOGIN</button>
+                <p style="margin-top:15px; font-size: 0.8rem; color: #94a3b8;">
+                    New user? <a href="javascript:void(0)" id="toggle-auth-link"
+                        style="color: #6a5af9; font-weight: bold;">Create Account</a>
+                </p>
             </div>
         </div>
+    </div>
     </div>
 
 
@@ -131,7 +134,7 @@
                             <p id="user-display-meta">Course & Semester</p>
                         </div>
                     </div>
-                    <button class="logout-btn" onclick="logout()">Logout</button>
+                    <button onclick="logoutUser()" class="primary-btn" style="margin-top: 10px">Logout</button>
                 </div>
 
                 <div class="card task-manager-card">
@@ -148,7 +151,6 @@
                             <tr>
                                 <th>Task Name</th>
                                 <th>Due Date</th>
-                                <th>Status</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -199,21 +201,25 @@
                             Plan</button>
                     </div>
                     <div id="roadmap-container" style="margin-top:30px;"></div>
+                    <button id="download-btn" class="add-btn"
+                        style="display: none; margin-top: 20px; width: 100%; background: #10b981;"
+                        onclick="downloadPlanner()">
+                        📥 Download Study Plan (PDF)
+                    </button>
                 </div>
             </div>
 
             <div id="notes-section" class="tab-content hidden">
                 <h1>Subject Wise Notes 📝</h1>
                 <div class="glass-card-no-center">
-                    <ul id="notes-list" style="list-style: none; margin-top: 20px; padding: 0;">
-                    </ul>
                     <h3>Upload New Study Material</h3>
                     <div style="display: flex; gap: 10px; margin: 15px 0;">
                         <input type="text" id="note-subject" placeholder="Subject Name" style="flex: 2;">
                         <input type="file" id="note-file" style="flex: 2;">
                     </div>
                     <button class="add-btn" onclick="addNoteLink()" style="width:100%;">Add to Vault</button>
-                    <ul id="notes-list" style="list-style: none; margin-top: 15px;"></ul>
+                    <ul id="notes-list" style="list-style: none; margin-top: 20px; padding: 0;">
+                    </ul>
                 </div>
             </div>
 
@@ -238,6 +244,7 @@
                         <input type="text" placeholder="Paste Google Drive Link..." style="flex: 4;">
                         <button class="add-btn" style="flex: 1;">Save Link</button>
                     </div>
+                    <div id="pyq-display" style="margin-top: 20px;"></div>
                 </div>
             </div>
 
@@ -272,19 +279,32 @@
             <div id="profile-section" class="tab-content hidden">
                 <h1>My Study Vault 👤</h1>
                 <div class="profile-grid">
-                    <div class="card">
-                        <h3>⭐ Saved Playlists</h3>
-                        <div id="saved-lectures"></div>
-                    </div>
-                    <div class="card">
-                        <h3>📄 My Notes</h3>
-                        <div id="saved-notes"></div>
+                    <!-- <div class="card"> -->
+                    <div class="vault-split">
+                        <div class="vault-column">
+                            <h4><span class="emoji">⭐</span> Saved Playlists</h4>
+                            <div id="saved-lectures">
+                            </div>
+                        </div>
+
+                        <div class="vault-column">
+                            <h4><span class="emoji">📄</span> My Notes</h4>
+                            <div id="saved-notes">
+                            </div>
+                        </div>
+
+                        <div class="vault-column">
+                            <h4><span class="emoji">📁</span> Saved PYQs</h4>
+                            <div id="pyq-display">
+                            </div>
+                        </div>
+
                     </div>
                 </div>
+                <!-- </div> -->
             </div>
         </div>
-    </div>
-    <script type="module" src="script.js"></script>
+        <script type="module" src="script.js"></script>
 </body>
 
 </html>

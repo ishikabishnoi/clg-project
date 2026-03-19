@@ -42,9 +42,9 @@ body {
     left: 0;
 }
 
-.hidden {
+/* .hidden {
     display: none !important;
-}
+} */
 
 /* 4. SIDEBAR - Locked to the left */
 .sidebar {
@@ -217,27 +217,22 @@ select {
     max-width: 300px;
 }
 
-/* Container for Personal vs Classmate Notes */
 .vault-split {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    /* This changes it from 2 columns to 3 equal columns */
+    grid-template-columns: repeat(3, 1fr);
     gap: 25px;
     margin-top: 30px;
 }
 
+/* Ensure the cards inside the vault columns look consistent */
 .vault-column {
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid var(--border);
     padding: 20px;
     border-radius: 15px;
-}
-
-.vault-column h4 {
-    margin-bottom: 15px;
-    color: var(--accent-pink);
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    min-height: 200px;
+    /* Gives them a uniform starting height */
 }
 
 /* Professional Syllabus Plan Cards */
@@ -623,4 +618,41 @@ body.light-mode .card {
     border-radius: 30px;
     height: 90vh;
     overflow-y: auto;
+}
+
+/*PDF EXPORT MODE - This is a special class that can be toggled on the body when exporting to PDF. It ensures a clean, printer-friendly design.*/
+.pdf-export-mode {
+    background: white !important;
+    color: black !important;
+    padding: 40px !important;
+}
+
+.pdf-export-mode .plan-card {
+    background: #f1f5f9 !important;
+    /* Light gray for cards in PDF */
+    border: 1px solid #cbd5e1 !important;
+    color: black !important;
+    margin-bottom: 10px !important;
+}
+
+.pdf-export-mode h3,
+.pdf-export-mode p,
+.pdf-export-mode small {
+    color: black !important;
+
+}
+
+.delete-icon-btn,
+.delete-btn {
+    display: none !important;
+}
+
+/* Bookmark Button Hover Effect */
+.bookmark-btn {
+    transition: transform 0.2s ease;
+}
+
+.bookmark-btn:hover {
+    transform: scale(1.2);
+    filter: brightness(1.2);
 }
