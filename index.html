@@ -241,8 +241,10 @@
                 <div class="glass-card-no-center">
                     <h3>Question Paper Drive</h3>
                     <div style="display: flex; gap: 10px; margin-top: 15px;">
-                        <input type="text" placeholder="Paste Google Drive Link..." style="flex: 4;">
-                        <button class="add-btn" style="flex: 1;">Save Link</button>
+                        <input type="text" id="pyq-link-input" placeholder="Paste Google Drive Link..."
+                            style="flex: 4;">
+
+                        <button onclick="savePYQLink()" class="add-btn" style="flex: 1;">Save Link</button>
                     </div>
                     <div id="pyq-display" style="margin-top: 20px;"></div>
                 </div>

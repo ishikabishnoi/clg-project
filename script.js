@@ -244,15 +244,23 @@ function renderTopics() {
     }
 }
 
-// Load saved data when the page opens without crashing the login
 window.onload = function () {
     console.log("App initialized.");
+
+    // Check if we have a session to fetch cloud data immediately
+    supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) {
+            currentUser = session.user;
+            fetchPlaylistsFromCloud(); // Pull fresh data from backend
+        }
+    });
+
     const savedTotal = localStorage.getItem('totalTopicsCount');
     const totalEl = document.getElementById('stat-total');
     if (savedTotal && totalEl) {
         totalEl.innerText = savedTotal;
     }
-}
+};
 
 
 window.showSection = function (sectionId) {
@@ -416,26 +424,39 @@ function getYoutubeID(url) {
     return null;
 }
 
-window.addPlaylist = function () {
-    const title = document.getElementById('playlist-title').value;
+window.addPlaylist = async function () {
+    const title = document.getElementById('playlist-title').value; // e.g., "Intro to Java"
     const url = document.getElementById('playlist-url').value;
+    // If you add the 'subject' column via SQL, you can also pull the current subject:
+    const subject = document.getElementById('subject-select')?.value || "General";
 
     if (!title || !url.includes('youtube.com')) {
         alert("Please enter a valid Topic Name and YouTube link!");
         return;
     }
 
-    const playlist = { title, url, id: Date.now() };
+    try {
+        const { data, error } = await supabase
+            .from('playlists')
+            .insert([{
+                title: title,
+                url: url,
+                subject: subject,
+                user_id: currentUser.id,
+                is_public: true
+            }]);
 
-    // 1. Save to LocalStorage
-    let playlists = JSON.parse(localStorage.getItem('userPlaylists')) || [];
-    playlists.push(playlist);
-    localStorage.setItem('userPlaylists', JSON.stringify(playlists));
+        if (error) throw error;
 
-    // 2. Clear inputs and refresh display
-    document.getElementById('playlist-title').value = '';
-    document.getElementById('playlist-url').value = '';
-    renderPlaylists();
+        alert("Playlist saved to Vault! ✨");
+        document.getElementById('playlist-title').value = '';
+        document.getElementById('playlist-url').value = '';
+
+        fetchPlaylistsFromCloud();
+
+    } catch (err) {
+        alert("Cloud Sync Error: " + err.message);
+    }
 };
 
 function renderPlaylists() {
@@ -554,13 +575,15 @@ async function fetchPlaylistsFromCloud() {
 
     const { data, error } = await supabase
         .from('playlists')
-        .select('*');
+        .select('*')
+        .eq('user_id', currentUser.id); // Only get YOUR playlists
 
     if (error) {
         console.error("Error fetching playlists:", error);
     } else {
-        savedPlaylists = data; // Syncs the cloud data to your local array
-        renderPlaylists();      // Updates the UI
+        // CRITICAL: Save cloud data to LocalStorage so renderPlaylists() can see it
+        localStorage.setItem('userPlaylists', JSON.stringify(data));
+        renderPlaylists(); // Now tell the UI to draw them
     }
 }
 
@@ -574,52 +597,53 @@ window.handleSyllabusAction = async function (mode) {
 
     container.innerHTML = "<p>Fetching from Cloud... ☁️</p>";
 
-    // Fetch topics matching the subject name
-    const { data: topics, error } = await supabase
+    const { data: rawData, error } = await supabase
         .from('master_syllabus')
         .select('topic')
         .eq('subject', subject);
 
-    if (error || !topics || topics.length === 0) {
+    if (error || !rawData || rawData.length === 0) {
         container.innerHTML = "<p>No syllabus found. Check your DB spelling!</p>";
         return;
     }
 
+    // --- THE FIX: SPLIT THE CHAPTER BLOCK ---
+    let allTopics = [];
+    rawData.forEach(row => {
+        // Splits by commas OR new lines, then cleans up extra spaces
+        const splitItems = row.topic.split(/,|\n/).map(t => t.trim()).filter(t => t !== "");
+        allTopics = allTopics.concat(splitItems);
+    });
+    // -----------------------------------------
+
     container.innerHTML = `<h3>${subject}</h3>`;
 
     if (mode === 'view') {
-        // Mode 1: Just show the list
-        topics.forEach(t => {
-            container.innerHTML += `<div class="syllabus-item" style="padding:10px; border-bottom:1px solid #444;">📖 ${t.topic}</div>`;
+        allTopics.forEach(t => {
+            container.innerHTML += `<div class="syllabus-item" style="padding:10px; border-bottom:1px solid #444;">📖 ${t}</div>`;
         });
     } else {
-        // Mode 2: Generate Planner based on User Input (Months)
         if (!months || months < 1) return alert("How many months do you have to study?");
 
         const totalWeeks = months * 4;
-        const topicsPerWeek = Math.ceil(topics.length / totalWeeks);
+        // Accurate math based on the SPLIT list
+        const topicsPerWeek = (allTopics.length / totalWeeks).toFixed(1);
 
         container.innerHTML += `<p style="color: #818cf8; margin-bottom:15px;">Plan: ${topicsPerWeek} topics/week over ${totalWeeks} weeks.</p>`;
 
-        topics.forEach((t, i) => {
-            const weekNum = Math.floor(i / topicsPerWeek) + 1;
+        allTopics.forEach((t, i) => {
+            const weekNum = Math.floor(i / Math.ceil(allTopics.length / totalWeeks)) + 1;
             container.innerHTML += `
                 <div class="plan-card" style="background: rgba(255,255,255,0.05); margin: 5px 0; padding: 10px; border-radius: 8px;">
                     <small style="color: #a78bfa;">WEEK ${weekNum}</small>
-                    <p>${t.topic}</p>
+                    <p>${t}</p>
                 </div>`;
         });
     }
-    if (mode === 'plan') {
-        const btn = document.getElementById('download-btn');
-        if (btn) {
-            btn.style.display = 'block'; // Now it will find the ID!
-        }
-    } else {
-        // Hide it if they are just "viewing" the list
-        document.getElementById('download-btn').style.display = 'none';
-    }
-}
+
+    const btn = document.getElementById('download-btn');
+    if (btn) btn.style.display = (mode === 'plan') ? 'block' : 'none';
+};
 
 
 // This connects your HTML button to your JS function
@@ -761,13 +785,37 @@ window.deleteTask = function (id) {
     renderTasks();
 };
 
-window.savePYQLink = function () {
+window.savePYQLink = async function () {
     const link = document.getElementById('pyq-link-input').value;
+    const subject = document.getElementById('subject-select')?.value || "General";
+
     if (!link) return alert("Paste a link first!");
 
-    localStorage.setItem('pyq_drive_link', link);
-    renderPYQ();
-    alert("Drive link synced! 🔗");
+    try {
+        // 1. Save to Supabase (Cloud Sync)
+        const { data, error } = await supabase
+            .from('pyqs')
+            .insert([{
+                url: link,
+                subject: subject,
+                // Assuming you want to link it to the user like the others
+                user_id: currentUser.id
+            }]);
+
+        if (error) throw error;
+
+        // 2. Local fallback & Success Alert
+        localStorage.setItem('pyq_drive_link', link);
+        alert("Drive link synced to Vault! 🔗");
+
+        // 3. UI Refresh
+        renderPYQ();
+        if (typeof updateProfileVault === "function") updateProfileVault();
+
+    } catch (err) {
+        console.error("PYQ Sync Error:", err.message);
+        alert("Failed to sync link: " + err.message);
+    }
 };
 
 function renderPYQ() {
