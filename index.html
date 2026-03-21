@@ -62,7 +62,6 @@
             </div>
         </div>
     </div>
-    </div>
 
 
     <div id="setup-screen" class="full-page-center hidden">
@@ -119,8 +118,8 @@
 
                     <div id="dropdown-menu" class="dropdown-content hidden">
                         <a href="javascript:void(0)" onclick="showSection('profile-section')">👤 My Profile</a>
-                        <a href="javascript:void(0)" onclick="toggleDarkMode()">🌙 Dark Mode</a>
-                        <a href="javascript:void(0)" onclick="toggleDesktopMode()">🖥️ Desktop Mode</a>
+                        <a href="javascript:void(0)" onclick="toggleDarkMode()">☀️ Light Mode</a>
+                        <!-- <a href="javascript:void(0)" onclick="toggleDesktopMode()">📱 Mobile View</a> -->
                         <a href="javascript:void(0)" onclick="showSection('about-section')">ℹ️ About</a>
                     </div>
                 </div>
@@ -248,11 +247,11 @@
             <div id="pyq-section" class="tab-content hidden">
                 <h1>Previous Year Questions 📄</h1>
                 <div class="glass-card-no-center">
-                    <h3>Question Paper Drive</h3>
+                    <h3>Upload Question Paper Link</h3>
                     <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <input type="text" id="pyq-subject-input" placeholder="Subject Name" style="flex: 2;">
                         <input type="text" id="pyq-link-input" placeholder="Paste Google Drive Link..."
-                            style="flex: 4;">
-
+                            style="flex: 3;">
                         <button onclick="savePYQLink()" class="add-btn" style="flex: 1;">Save Link</button>
                     </div>
                     <div id="pyq-display" style="margin-top: 20px;"></div>
@@ -273,21 +272,6 @@
                 </div>
             </div>
 
-            <div id="dropdown-menu" class="dropdown-content hidden">
-                <a href="javascript:void(0)" onclick="showSection('profile-section')">👤 My Profile</a>
-
-                <a href="javascript:void(0)" onclick="toggleDarkMode()">
-                    🌙 Dark Mode <input type="checkbox" id="dark-mode-check" checked style="pointer-events: none;">
-                </a>
-
-                <a href="javascript:void(0)" onclick="toggleDesktopMode()">
-                    🖥️ Desktop Mode <input type="checkbox" id="desktop-mode-check" checked
-                        style="pointer-events: none;">
-                </a>
-
-                <a href="javascript:void(0)" onclick="showSection('about-section')">ℹ️ About</a>
-            </div>
-
             <div id="profile-section" class="tab-content hidden">
                 <h1>My Study Vault 👤</h1>
 
@@ -305,13 +289,12 @@
 
                     <div class="vault-column">
                         <h4><span class="emoji">📁</span> Saved PYQs</h4>
-                        <div id="pyq-display"></div>
+                        <div id="saved-pyqs"></div>
                     </div>
 
                 </div>
             </div>
         </div>
-    </div>
     </div>
     <script type="module" src="script.js"></script>
 </body>

@@ -70,23 +70,23 @@ window.loginUser = async function loginUser() {
         showDashboard();
     }
 }
-// LOGOUT FUNCTION
-window.toggleMenu = function () {
-    const menu = document.getElementById('dropdown-menu');
-    menu.classList.toggle('hidden');
-}
+// // LOGOUT FUNCTION
+// window.toggleMenu = function () {
+//     const menu = document.getElementById('dropdown-menu');
+//     menu.classList.toggle('hidden');
+// }
 
-window.logoutUser = async function () {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-        alert("Error logging out: " + error.message);
-    } else {
-        // Reset local state
-        currentUser = null;
-        // Redirect to landing page or reload
-        location.reload();
-    }
-}
+// window.logoutUser = async function () {
+//     const { error } = await supabase.auth.signOut();
+//     if (error) {
+//         alert("Error logging out: " + error.message);
+//     } else {
+//         // Reset local state
+//         currentUser = null;
+//         // Redirect to landing page or reload
+//         location.reload();
+//     }
+// }
 
 // This part ensures the menu closes if you click anywhere else on the screen
 window.addEventListener('click', function (event) {
@@ -261,6 +261,8 @@ window.onload = function () {
     if (savedTotal && totalEl) {
         totalEl.innerText = savedTotal;
     }
+    renderPYQ();
+    fetchPYQsFromCloud();
 };
 
 
@@ -355,23 +357,26 @@ window.addNoteLink = async function addNoteLink() {
 function renderNotes() {
     const list = document.getElementById('notes-list');
     if (!list) return;
-    list.innerHTML = '';
 
-    savedNotes.forEach((note) => {
-        list.innerHTML += `
-    <li style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #6a5af9;">
-        <div>
+    if (savedNotes.length === 0) {
+        list.innerHTML = '<p style="color:#64748b; font-size:0.8rem;">No notes uploaded yet.</p>';
+        return;
+    }
+
+    list.style.display = 'grid';
+    list.style.gridTemplateColumns = '1fr 1fr';
+    list.style.gap = '15px';
+
+    list.innerHTML = savedNotes.map(note => `
+        <div class="card" style="background: var(--bg-main); padding: 15px; border-radius: 12px; border: 1px solid var(--border); border-left: 5px solid var(--accent-purple);">
             <strong style="color: #fff;">${note.subject}</strong><br>
             <span style="font-size: 0.85rem; color: #aaa;">📄 ${note.fileName || 'Note'}</span>
+            <div style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+                <a href="${note.file_url}" target="_blank" style="color: var(--accent-purple); text-decoration: none; font-size: 0.9rem; font-weight: bold;">View ↗</a>
+                <button class="bookmark-btn" onclick="saveToVault('${note.id}', 'note')">🔖</button>
+            </div>
         </div>
-        <div>
-            <a href="${note.file_url}" target="_blank" style="color: #6a5af9; text-decoration: none; font-size: 0.9rem; margin-right: 10px;">View ↗</a>
-            
-            <button class="bookmark-btn" onclick="saveToVault('${note.id}', 'note')">🔖</button>
-        </div>
-    </li>
-`;
-    });
+    `).join('');
 }
 
 // This only hides it for the CURRENT user's browser
@@ -474,29 +479,16 @@ function renderPlaylists() {
     }
 
     container.innerHTML = playlists.map(p => `
-    <div class="card" style="background: white; color: black; padding: 15px; border-radius: 12px; position: relative;">
-        <h4 style="margin-right: 10px;">${p.title}</h4>
+    <div class="card" style="background: var(--bg-main); color: white; padding: 15px; border-radius: 12px; position: relative; border: 1px solid var(--border);">
+        <h4 style="margin-bottom: 10px;">${p.title}</h4>
         <div style="display: flex; justify-content: space-between; align-items: center;">
-            <a href="${p.url}" target="_blank" style="color: #6a5af9; font-size: 0.8rem; font-weight: bold;">Watch on YouTube ↗</a>
+            <a href="${p.url}" target="_blank" style="color: var(--accent-purple); font-size: 0.8rem; font-weight: bold; text-decoration: none;">Watch on YouTube ↗</a>
             
             <button class="bookmark-btn" onclick="saveToVault('${p.id}', 'playlist')">🔖</button>
         </div>
     </div>
 `).join('');
 }
-
-// This only hides it for the CURRENT user's browser
-window.hideFromProfile = function (id, type) {
-    if (!confirm(`Hide this ${type} from your profile view? (It will remain in the public vault)`)) return;
-
-    // Save the hidden ID to localStorage
-    let hiddenItems = JSON.parse(localStorage.getItem('hidden_items')) || [];
-    hiddenItems.push(id);
-    localStorage.setItem('hidden_items', JSON.stringify(hiddenItems));
-
-    // Refresh the profile view
-    updateProfileVault();
-};
 
 // Call this once when the page loads
 renderPlaylists();
@@ -623,7 +615,6 @@ window.handleSyllabusAction = async function (mode) {
         const splitItems = row.topic.split(/,|\n/).map(t => t.trim()).filter(t => t !== "");
         allTopics = allTopics.concat(splitItems);
     });
-    // -----------------------------------------
 
     container.innerHTML = `<h3>${subject}</h3>`;
 
@@ -727,26 +718,51 @@ window.toggleMenu = function () {
     document.getElementById('dropdown-menu').classList.toggle('hidden');
 }
 
-// 1. Dark Mode / Light Mode Logic
 window.toggleDarkMode = function () {
-    // We toggle a 'light-mode' class on the body
     document.body.classList.toggle('light-mode');
-
-    // Optional: Save preference
     const isLight = document.body.classList.contains('light-mode');
+    // Update the button label dynamically
+    const btn = document.querySelector('[onclick="toggleDarkMode()"]');
+    if (btn) btn.innerHTML = isLight ? '🌙 Dark Mode' : '☀️ Light Mode';
     localStorage.setItem('theme', isLight ? 'light' : 'dark');
 };
 
-// 2. Desktop / Mobile View Logic
-window.toggleDesktopMode = function () {
-    // We toggle a 'mobile-view' class on the container
-    const container = document.querySelector('.container');
-    container.classList.toggle('mobile-view');
+// window.toggleDesktopMode = function () {
+//     const container = document.getElementById('dashboard-screen');
+//     const isMobile = container.classList.toggle('mobile-view');
+//     const btn = document.querySelector('[onclick="toggleDesktopMode()"]');
+//     if (btn) btn.innerHTML = isMobile ? '🖥️ Desktop Mode' : '📱 Mobile View';
 
-    // Update button text or icon if you want
-    const status = container.classList.contains('mobile-view') ? 'Mobile' : 'Desktop';
-    console.log("View Mode:", status);
-};
+//     // Handle overlay
+//     let overlay = document.getElementById('mobile-overlay');
+//     if (isMobile) {
+//         // Create overlay
+//         if (!overlay) {
+//             overlay = document.createElement('div');
+//             overlay.id = 'mobile-overlay';
+//             document.body.appendChild(overlay);
+//         }
+
+//         // Create bottom nav
+//         const bottomNav = document.createElement('div');
+//         bottomNav.id = 'mobile-bottom-nav';
+//         bottomNav.innerHTML = `
+//             <button onclick="showSection('dashboard-section')">📊<span>Home</span></button>
+//             <button onclick="showSection('syllabus-section')">📚<span>Syllabus</span></button>
+//             <button onclick="showSection('notes-section')">📝<span>Notes</span></button>
+//             <button onclick="showSection('lectures-section')">📺<span>Lectures</span></button>
+//             <button onclick="showSection('pyq-section')">📄<span>PYQs</span></button>
+//         `;
+//         container.appendChild(bottomNav);
+
+//     } else {
+//         // Remove overlay
+//         if (overlay) overlay.remove();
+//         // Remove bottom nav
+//         const existing = document.getElementById('mobile-bottom-nav');
+//         if (existing) existing.remove();
+//     }
+// };
 
 // Close menu if user clicks outside
 window.onclick = function (event) {
@@ -796,30 +812,30 @@ window.deleteTask = function (id) {
 
 window.savePYQLink = async function () {
     const link = document.getElementById('pyq-link-input').value;
-    const subject = document.getElementById('subject-select')?.value || "General";
+    const subject = document.getElementById('pyq-subject-input').value;
 
     if (!link) return alert("Paste a link first!");
+    if (!subject) return alert("Enter a subject name!");
 
     try {
-        // 1. Save to Supabase (Cloud Sync)
         const { data, error } = await supabase
             .from('pyqs')
             .insert([{
                 url: link,
                 subject: subject,
-                // Assuming you want to link it to the user like the others
                 user_id: currentUser.id
             }]);
 
         if (error) throw error;
 
-        // 2. Local fallback & Success Alert
         localStorage.setItem('pyq_drive_link', link);
         alert("Drive link synced to Vault! 🔗");
 
-        // 3. UI Refresh
-        renderPYQ();
-        if (typeof updateProfileVault === "function") updateProfileVault();
+        // Clear inputs
+        document.getElementById('pyq-link-input').value = '';
+        document.getElementById('pyq-subject-input').value = '';
+
+        fetchPYQsFromCloud();
 
     } catch (err) {
         console.error("PYQ Sync Error:", err.message);
@@ -828,20 +844,28 @@ window.savePYQLink = async function () {
 };
 
 function renderPYQ() {
-    const link = localStorage.getItem('pyq_drive_link');
+    const pyqList = JSON.parse(localStorage.getItem('public_pyqs')) || [];
     const display = document.getElementById('pyq-display');
     if (!display) return;
 
-    if (link) {
-        display.innerHTML = `
-            <div class="card" style="background: rgba(106, 90, 249, 0.1); border: 1px dashed #6a5af9; padding: 15px; text-align: center; margin-top:10px;">
-                <p style="font-size: 0.8rem; margin-bottom: 10px;">Drive Folder Connected</p>
-                <a href="${link}" target="_blank" style="color: #6a5af9; font-weight: bold; text-decoration: none; font-size: 0.9rem;">📂 Open Drive</a>
-            </div>
-        `;
-    } else {
-        display.innerHTML = '<p style="color: #64748b; font-size: 0.8rem;">No Drive link connected.</p>';
+    if (pyqList.length === 0) {
+        display.innerHTML = '<p style="color: #64748b; font-size: 0.8rem; text-align: center;">No Drive links shared yet.</p>';
+        return;
     }
+
+    display.style.display = 'grid';
+    display.style.gridTemplateColumns = '1fr 1fr';
+    display.style.gap = '15px';
+
+    display.innerHTML = pyqList.map(item => `
+        <div class="card" style="background: var(--bg-main); padding: 15px; border-radius: 12px; border: 1px solid var(--border); border-left: 5px solid #10b981;">
+            <p style="font-size: 0.9rem; color: white; margin-bottom: 6px; font-weight: bold;">${item.subject || 'General'} PYQ</p>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <a href="${item.url}" target="_blank" style="color: #10b981; font-weight: bold; text-decoration: none; font-size: 0.85rem;">📂 Open Drive ↗</a>
+                <button class="bookmark-btn" onclick="saveToVault('${item.id}', 'pyq')">🔖</button>
+            </div>
+        </div>
+    `).join('');
 }
 
 window.deletePYQ = function () {
@@ -855,58 +879,178 @@ window.deletePYQ = function () {
 async function fetchPYQsFromCloud() {
     const { data, error } = await supabase
         .from('pyqs')
-        .select('url')
-        .order('created_at', { ascending: false }); // Get all links, newest first
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    if (data && data.length > 0) {
-        // You can either show the latest one or a list. 
-        // For now, let's keep the latest one visible globally:
-        localStorage.setItem('pyq_drive_link', data[0].url);
+    if (error) {
+        console.error("PYQ Fetch Error:", error.message);
+        return;
+    }
+
+    if (data) {
+        // 1. Update LocalStorage so it's there for the next refresh
+        localStorage.setItem('public_pyqs', JSON.stringify(data));
+
+        // 2. Immediately call the render function
         renderPYQ();
     }
 }
 
-// async function fetchGlobalPYQs() {
-//     // We don't filter by user_id here so it's public!
-//     const { data, error } = await supabase
-//         .from('pyqs')
-//         .select('url')
-//         .order('created_at', { ascending: false })
-//         .limit(1);
-
-//     if (data && data.length > 0) {
-//         // Save to localStorage so your render function can see it
-//         localStorage.setItem('pyq_drive_link', data[0].url);
-
-//         // Call your existing function that puts the link on the screen
-//         renderPYQ();
-//     }
-// }
-
 window.saveToVault = async function (id, type) {
-    // 1. Safety check for the ID
-    if (!id || id === 'undefined' || id.length < 10) {
-        console.error("Missing valid UUID. ID found:", id);
-        alert("Wait! This item doesn't have a cloud ID yet. Try refreshing the page.");
+    // 1. Basic check to ensure we have an ID
+    if (!id || id === 'undefined') {
+        alert("Item ID missing. Try refreshing the page! 🔄");
         return;
     }
 
     if (!currentUser) {
-        alert("Login first to save this! 🔑");
+        alert("Login first to save this to your Vault! 🔑");
         return;
     }
 
-    const { error } = await supabase
+    try {
+        // 2. Insert into the bookmarks table
+        const { error } = await supabase
+            .from('bookmarks')
+            .insert([{
+                user_id: currentUser.id,
+                item_id: id.toString(), // Convert to string to prevent syntax errors
+                item_type: type
+            }]);
+
+        if (error) {
+            // Check if it's a duplicate bookmark error
+            if (error.code === '23505') {
+                alert("Already in your Study Vault! ✨");
+            } else {
+                throw error;
+            }
+        } else {
+            alert("Saved to your Study Vault! 🔖");
+            // If you have a profile view open, refresh it
+            if (typeof updateProfileVault === "function") updateProfileVault();
+        }
+
+    } catch (err) {
+        console.error("Vault Error:", err.message);
+        alert("Error saving bookmark: " + err.message);
+    }
+};
+
+window.syncVault = async function () {
+    if (!currentUser) return;
+
+    // 1. Fetch all bookmarks for the logged-in user
+    const { data: bookmarks, error } = await supabase
         .from('bookmarks')
-        .insert([{
-            user_id: currentUser.id,
-            item_id: id,
-            item_type: type
-        }]);
+        .select('*')
+        .eq('user_id', currentUser.id);
 
     if (error) {
-        alert("Error: " + error.message);
-    } else {
-        alert("Saved to your Study Vault! 🔖");
+        console.error("Vault fetch error:", error.message);
+        return;
     }
-}
+
+    if (!bookmarks || bookmarks.length === 0) {
+        document.getElementById('saved-lectures').innerHTML = '<p style="font-size:0.8rem; color:#94a3b8;">No saved playlists yet.</p>';
+        document.getElementById('saved-notes').innerHTML = '<p style="font-size:0.8rem; color:#94a3b8;">No saved notes yet.</p>';
+        document.getElementById('saved-pyqs').innerHTML = '<p style="font-size:0.8rem; color:#94a3b8;">No saved PYQs yet.</p>';
+        return;
+    }
+
+    // 2. Separate bookmark IDs by type
+    const playlistIds = bookmarks.filter(b => b.item_type === 'playlist').map(b => b.item_id);
+    const noteIds = bookmarks.filter(b => b.item_type === 'note').map(b => b.item_id);
+    const pyqIds = bookmarks.filter(b => b.item_type === 'pyq').map(b => b.item_id);
+
+    // 3. Fetch actual data from each table
+    const [playlistRes, noteRes, pyqRes] = await Promise.all([
+        playlistIds.length > 0
+            ? supabase.from('playlists').select('*').in('id', playlistIds)
+            : Promise.resolve({ data: [] }),
+
+        noteIds.length > 0
+            ? supabase.from('notes_vault').select('*').in('id', noteIds)
+            : Promise.resolve({ data: [] }),
+
+        pyqIds.length > 0
+            ? supabase.from('pyqs').select('*').in('id', pyqIds)
+            : Promise.resolve({ data: [] }),
+    ]);
+
+    // 4. Render Playlists
+    const lecturesEl = document.getElementById('saved-lectures');
+    if (playlistRes.data && playlistRes.data.length > 0) {
+        lecturesEl.innerHTML = playlistRes.data.map(p => `
+            <div class="card" style="margin-bottom: 10px; border-left: 4px solid var(--accent-purple); position: relative;">
+                <small style="color: #94a3b8;">${p.subject || 'General'}</small>
+                <p style="font-weight: bold; margin: 5px 0;">${p.title}</p>
+                <a href="${p.url}" target="_blank" 
+                   style="color: var(--accent-purple); font-size: 0.85rem; font-weight: bold; text-decoration: none;">
+                   ▶ Watch on YouTube ↗
+                </a>
+                <button onclick="removeBookmark('${p.id}', 'playlist')"
+                    style="position:absolute; right:10px; top:10px; background:none; border:none; cursor:pointer; font-size:1rem;">🗑️</button>
+            </div>
+        `).join('');
+    } else {
+        lecturesEl.innerHTML = '<p style="font-size:0.8rem; color:#94a3b8; margin-top: 15px;">No saved playlists yet.</p>';
+    }
+
+    // 5. Render Notes
+    const notesEl = document.getElementById('saved-notes');
+    if (noteRes.data && noteRes.data.length > 0) {
+        notesEl.innerHTML = noteRes.data.map(n => `
+            <div class="card" style="margin-bottom: 10px; border-left: 4px solid var(--accent-pink); position: relative;">
+                <small style="color: #94a3b8;">${n.subject || 'General'}</small>
+                <p style="font-weight: bold; margin: 5px 0;">${n.file_name || 'Note'}</p>
+                <a href="${n.file_url}" target="_blank" 
+                   style="color: var(--accent-pink); font-size: 0.85rem; font-weight: bold; text-decoration: none;">
+                   📄 Open File ↗
+                </a>
+                <button onclick="removeBookmark('${n.id}', 'note')"
+                    style="position:absolute; right:10px; top:10px; background:none; border:none; cursor:pointer; font-size:1rem;">🗑️</button>
+            </div>
+        `).join('');
+    } else {
+        notesEl.innerHTML = '<p style="font-size:0.8rem; color:#94a3b8; margin-top: 15px;">No saved notes yet.</p>';
+    }
+
+    // 6. Render PYQs
+    const pyqsEl = document.getElementById('saved-pyqs');
+    if (pyqRes.data && pyqRes.data.length > 0) {
+        pyqsEl.innerHTML = pyqRes.data.map(q => `
+            <div class="card" style="margin-bottom: 10px; border-left: 4px solid #10b981; position: relative;">
+                <small style="color: #94a3b8;">${q.subject || 'General'}</small>
+                <p style="margin: 5px 0;">
+                    <a href="${q.url}" target="_blank" 
+                       style="color: #10b981; font-size: 0.85rem; font-weight: bold; text-decoration: none;">
+                       📂 Open Drive Folder ↗
+                    </a>
+                </p>
+                <button onclick="removeBookmark('${q.id}', 'pyq')"
+                    style="position:absolute; right:10px; top:10px; background:none; border:none; cursor:pointer; font-size:1rem;">🗑️</button>
+            </div>
+        `).join('');
+    } else {
+        pyqsEl.innerHTML = '<p style="font-size:0.8rem; color:#94a3b8; margin-top: 15px;">No saved PYQs yet.</p>';
+    }
+};
+
+// Removes a bookmark from the user's vault (NOT from public section)
+window.removeBookmark = async function (itemId, itemType) {
+    if (!confirm(`Remove this ${itemType} from your vault?`)) return;
+
+    const { error } = await supabase
+        .from('bookmarks')
+        .delete()
+        .eq('user_id', currentUser.id)
+        .eq('item_id', itemId);
+
+    if (error) {
+        alert("Error removing: " + error.message);
+    } else {
+        alert("Removed from your Vault! 🗑️");
+        syncVault(); // Refresh the vault view
+    }
+};

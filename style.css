@@ -215,11 +215,9 @@ select {
 .vault-split {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    /* 3 equal columns */
     gap: 25px;
-    margin-top: 30px;
+    margin-top: 50px;
     width: 100%;
-    /* Ensures it fills the whole right side */
 }
 
 /* Ensure the cards inside the vault columns look consistent */
@@ -266,17 +264,6 @@ select {
     font-size: 0.8rem;
     margin-bottom: 5px;
     text-transform: uppercase;
-}
-
-/* This is the parent wrapper that holds all the cards */
-.notes-container {
-    display: grid;
-    /* This forces 2 equal columns. If you want it to wrap 
-       automatically like the lectures, use the repeat(auto-fit...) version below */
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin-top: 20px;
-    align-items: start;
 }
 
 .notes-container {
@@ -481,18 +468,6 @@ select {
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.delete-icon-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1.1rem;
-    transition: transform 0.2s;
-}
-
-.delete-icon-btn:hover {
-    transform: scale(1.2);
-}
-
 .task-header {
     display: flex;
     justify-content: space-between;
@@ -601,29 +576,51 @@ select {
     margin-top: 20px;
 }
 
-/* DARK/LIGHT MODE STYLES */
 body.light-mode {
     background-color: #f8fafc;
     color: #1e293b;
 }
 
+body.light-mode .sidebar {
+    background: #e2e8f0;
+    border-right: 1px solid #cbd5e1;
+}
+
+body.light-mode .sidebar li {
+    color: #475569;
+}
+
+body.light-mode .main-content {
+    background: #f8fafc;
+}
+
+body.light-mode .card,
 body.light-mode .glass-card-no-center,
-body.light-mode .card {
-    background: rgba(255, 255, 255, 0.8);
+body.light-mode .glass-card {
+    background: #ffffff;
     color: #1e293b;
     border: 1px solid #e2e8f0;
 }
 
-/* MOBILE VIEW SIMULATION */
-.container.mobile-view {
-    max-width: 430px;
-    /* Standard mobile width */
-    margin: 0 auto;
-    border: 10px solid #334155;
-    /* Phone border effect */
-    border-radius: 30px;
-    height: 90vh;
-    overflow-y: auto;
+body.light-mode input,
+body.light-mode select {
+    background: #f1f5f9 !important;
+    color: #1e293b !important;
+    border: 1px solid #cbd5e1 !important;
+}
+
+body.light-mode .profile-bar {
+    background: linear-gradient(to right, #e2e8f0, #f1f5f9);
+    border: 1px solid #cbd5e1;
+}
+
+body.light-mode .task-table th {
+    color: #475569;
+}
+
+body.light-mode .vault-column {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
 }
 
 /*PDF EXPORT MODE - This is a special class that can be toggled on the body when exporting to PDF. It ensures a clean, printer-friendly design.*/
@@ -646,11 +643,6 @@ body.light-mode .card {
 .pdf-export-mode small {
     color: black !important;
 
-}
-
-.delete-icon-btn,
-.delete-btn {
-    display: none !important;
 }
 
 /* 1. The Container that wraps the 3 boxes */
