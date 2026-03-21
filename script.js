@@ -359,14 +359,18 @@ function renderNotes() {
 
     savedNotes.forEach((note) => {
         list.innerHTML += `
-            <li style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #6a5af9;">
-                <div>
-                    <strong style="color: #fff;">${note.subject}</strong><br>
-                    <span style="font-size: 0.85rem; color: #aaa;">📄 ${note.file_name || 'Note'}</span>
-                </div>
-                <a href="${note.file_url}" target="_blank" style="color: #6a5af9; text-decoration: none; font-size: 0.9rem;">View ↗</a>
-            </li>
-        `;
+    <li style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #6a5af9;">
+        <div>
+            <strong style="color: #fff;">${note.subject}</strong><br>
+            <span style="font-size: 0.85rem; color: #aaa;">📄 ${note.fileName || 'Note'}</span>
+        </div>
+        <div>
+            <a href="${note.file_url}" target="_blank" style="color: #6a5af9; text-decoration: none; font-size: 0.9rem; margin-right: 10px;">View ↗</a>
+            
+            <button class="bookmark-btn" onclick="saveToVault('${note.id}', 'note')">🔖</button>
+        </div>
+    </li>
+`;
     });
 }
 
@@ -472,7 +476,11 @@ function renderPlaylists() {
     container.innerHTML = playlists.map(p => `
     <div class="card" style="background: white; color: black; padding: 15px; border-radius: 12px; position: relative;">
         <h4 style="margin-right: 10px;">${p.title}</h4>
-        <a href="${p.url}" target="_blank" style="color: #6a5af9; font-size: 0.8rem; font-weight: bold;">Watch on YouTube ↗</a>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <a href="${p.url}" target="_blank" style="color: #6a5af9; font-size: 0.8rem; font-weight: bold;">Watch on YouTube ↗</a>
+            
+            <button class="bookmark-btn" onclick="saveToVault('${p.id}', 'playlist')">🔖</button>
+        </div>
     </div>
 `).join('');
 }
@@ -573,6 +581,7 @@ supabase.auth.onAuthStateChange((event, session) => {
         fetchNotesFromCloud();
     }
 });
+
 
 async function fetchPlaylistsFromCloud() {
 
@@ -854,5 +863,50 @@ async function fetchPYQsFromCloud() {
         // For now, let's keep the latest one visible globally:
         localStorage.setItem('pyq_drive_link', data[0].url);
         renderPYQ();
+    }
+}
+
+// async function fetchGlobalPYQs() {
+//     // We don't filter by user_id here so it's public!
+//     const { data, error } = await supabase
+//         .from('pyqs')
+//         .select('url')
+//         .order('created_at', { ascending: false })
+//         .limit(1);
+
+//     if (data && data.length > 0) {
+//         // Save to localStorage so your render function can see it
+//         localStorage.setItem('pyq_drive_link', data[0].url);
+
+//         // Call your existing function that puts the link on the screen
+//         renderPYQ();
+//     }
+// }
+
+window.saveToVault = async function (id, type) {
+    // 1. Safety check for the ID
+    if (!id || id === 'undefined' || id.length < 10) {
+        console.error("Missing valid UUID. ID found:", id);
+        alert("Wait! This item doesn't have a cloud ID yet. Try refreshing the page.");
+        return;
+    }
+
+    if (!currentUser) {
+        alert("Login first to save this! 🔑");
+        return;
+    }
+
+    const { error } = await supabase
+        .from('bookmarks')
+        .insert([{
+            user_id: currentUser.id,
+            item_id: id,
+            item_type: type
+        }]);
+
+    if (error) {
+        alert("Error: " + error.message);
+    } else {
+        alert("Saved to your Study Vault! 🔖");
     }
 }

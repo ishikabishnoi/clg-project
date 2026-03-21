@@ -34,6 +34,7 @@
 
     <div class="intro-section">
         <h3 class="intro-lead">Built by students, for the students</h3>
+        <ul style="margin-top: 20px;"></ul>
         <p class="intro-text">
             Dovetail was born from a simple realization: learning shouldn't feel like a search mission.
             By merging your lecture playlists, notes, and previous year questions into a single,
@@ -46,7 +47,7 @@
     <div class="auth-container" id="login-screen">
         <div class="login-card">
             <div class="login-visual">
-                <h1>Welcome to doveTail!</h1>
+                <!-- <h1>Welcome to doveTail!</h1> -->
                 <p>Log in to access your personalized study vault.</p>
             </div>
             <div class="login-form">
@@ -74,7 +75,7 @@
                 <select id="signup-course">
                     <option value="">Select Course</option>
                     <option value="BSc Computer Science">BSc Computer Science</option>
-                    <option value="BCA">BA LLB</option>
+                    <option value="BCA">B.A.LL.B.</option>
                     <option value="BSc Biotechnology">BSc Biotechnology</option>
                 </select>
                 <select id="signup-semester">
@@ -165,12 +166,12 @@
                     <div style="display: flex; gap: 10px; margin-bottom: 20px;">
                         <select id="subject-select" style="flex: 2;">
                             <option value="">Select Subject</option>
-                            <option value="English Language and Professional Communication-I">English Language
-                                and
-                                Professional Communication-I</option>
+                            <option value="English language and Professional Courses-I">English language and
+                                Professional Courses-I</option>
                             <option value="Applied Mathematics-I">Applied Mathematics-I</option>
                             <option value="Applied Physics">Applied Physics</option>
-                            <option value="Computer Fundamentals">Computer Fundamentals</option>
+                            <option value="Computer Fundamentals,MS Windows and MS Office Tools">Computer
+                                Fundamentals,MS Windows and MS Office Tools </option>
                             <option value="English Language and Professional Communication-II">English Language
                                 and
                                 Professional Communication-II</option>
@@ -178,19 +179,27 @@
                             <option value="Basic Electronics">Basic Electronics</option>
                             <option value="Programming in C">Programming in C</option>
                             <option value="Discrete Structures">Discrete Structures</option>
-                            <option value="Switching Theory & Logic Design">Switching Theory & Logic Design
+                            <option value="Switching Theory and Logic Design">Switching Theory and Logic Design
                             </option>
-                            <option value="Data Structures in C">Data Structures in C</option>
+                            <option value="Data Structure using C">Data Structure using C</option>
                             <option value="Computer Oriented Numeric Techniques">Computer Oriented Numeric
                                 Techniques
                             </option>
-                            <option value="Computer Organisations">Computer Organisations</option>
+                            <option value="Computer Organisation">Computer Organisation</option>
                             <option value="OOP Through C++">OOP Through C++</option>
                             <option value="Data Base Management System">Data Base Management System</option>
-                            <option value="System Software">System Software</option>
+                            <option value="System Software and Networking">System Software and Networking</option>
                             <option value="Java Programming">Java Programming</option>
                             <option value="Computer Networks">Computer Networks</option>
-                            <option value="System Analysis & Design">System Analysis & Design</option>
+                            <option value="System Analysis and Design">System Analysis and Design</option>
+                            <option value="General English-I"> General English-I</option>
+                            <option value="General English-II"> General English-II</option>
+                            <option value="Political Science-I"> Political Science-I</option>
+                            <option value="Political Science-II"> Political Science-II</option>
+                            <option value="Sociology-I"> Sociology-I</option>
+                            <option value="Sociology-II"> Sociology-II</option>
+                            <option value="Economics-I"> Economics-I</option>
+                            <option value="Indian History-I"> Indian History-I</option>
                         </select>
                         <input type="number" id="months-input-roadmap" placeholder="Months?" style="flex: 1;">
                     </div>
@@ -254,11 +263,12 @@
                 <h1>About DoveTail! ✨</h1>
                 <div class="glass-card-no-center">
                     <p>Dovetail was born from a simple realization: learning shouldn't feel like a search mission.</p>
+                    <ul style="margin-top: 20px;"></ul>
                     <h3>Future Updates:</h3>
                     <ul>
-                        <li>Real-time Collaboration with classmates</li>
+                        <li>...</li>
                         <li>AI-powered Study Summaries</li>
-                        <li>Mobile App Launch</li>
+                        <li>...</li>
                     </ul>
                 </div>
             </div>
@@ -280,33 +290,30 @@
 
             <div id="profile-section" class="tab-content hidden">
                 <h1>My Study Vault 👤</h1>
-                <div class="profile-grid">
-                    <!-- <div class="card"> -->
-                    <div class="vault-split">
-                        <div class="vault-column">
-                            <h4><span class="emoji">⭐</span> Saved Playlists</h4>
-                            <div id="saved-lectures">
-                            </div>
-                        </div>
 
-                        <div class="vault-column">
-                            <h4><span class="emoji">📄</span> My Notes</h4>
-                            <div id="saved-notes">
-                            </div>
-                        </div>
+                <div class="vault-split">
 
-                        <div class="vault-column">
-                            <h4><span class="emoji">📁</span> Saved PYQs</h4>
-                            <div id="pyq-display">
-                            </div>
-                        </div>
-
+                    <div class="vault-column">
+                        <h4><span class="emoji">⭐</span> Saved Playlists</h4>
+                        <div id="saved-lectures"></div>
                     </div>
+
+                    <div class="vault-column">
+                        <h4><span class="emoji">📄</span> Saved Notes</h4>
+                        <div id="saved-notes"></div>
+                    </div>
+
+                    <div class="vault-column">
+                        <h4><span class="emoji">📁</span> Saved PYQs</h4>
+                        <div id="pyq-display"></div>
+                    </div>
+
                 </div>
-                <!-- </div> -->
             </div>
         </div>
-        <script type="module" src="script.js"></script>
+    </div>
+    </div>
+    <script type="module" src="script.js"></script>
 </body>
 
 </html>
