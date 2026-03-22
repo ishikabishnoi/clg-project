@@ -70,23 +70,6 @@ window.loginUser = async function loginUser() {
         showDashboard();
     }
 }
-// // LOGOUT FUNCTION
-// window.toggleMenu = function () {
-//     const menu = document.getElementById('dropdown-menu');
-//     menu.classList.toggle('hidden');
-// }
-
-// window.logoutUser = async function () {
-//     const { error } = await supabase.auth.signOut();
-//     if (error) {
-//         alert("Error logging out: " + error.message);
-//     } else {
-//         // Reset local state
-//         currentUser = null;
-//         // Redirect to landing page or reload
-//         location.reload();
-//     }
-// }
 
 // This part ensures the menu closes if you click anywhere else on the screen
 window.addEventListener('click', function (event) {
@@ -161,8 +144,6 @@ window.downloadPlanner = function () {
         return alert("Generate a plan first!");
     }
 
-    // 1. Add a class to force PDF-friendly styles (White bg, Black text)
-    // This uses the CSS class we discussed earlier
     element.classList.add('pdf-export-mode');
 
     const opt = {
@@ -726,43 +707,6 @@ window.toggleDarkMode = function () {
     if (btn) btn.innerHTML = isLight ? '🌙 Dark Mode' : '☀️ Light Mode';
     localStorage.setItem('theme', isLight ? 'light' : 'dark');
 };
-
-// window.toggleDesktopMode = function () {
-//     const container = document.getElementById('dashboard-screen');
-//     const isMobile = container.classList.toggle('mobile-view');
-//     const btn = document.querySelector('[onclick="toggleDesktopMode()"]');
-//     if (btn) btn.innerHTML = isMobile ? '🖥️ Desktop Mode' : '📱 Mobile View';
-
-//     // Handle overlay
-//     let overlay = document.getElementById('mobile-overlay');
-//     if (isMobile) {
-//         // Create overlay
-//         if (!overlay) {
-//             overlay = document.createElement('div');
-//             overlay.id = 'mobile-overlay';
-//             document.body.appendChild(overlay);
-//         }
-
-//         // Create bottom nav
-//         const bottomNav = document.createElement('div');
-//         bottomNav.id = 'mobile-bottom-nav';
-//         bottomNav.innerHTML = `
-//             <button onclick="showSection('dashboard-section')">📊<span>Home</span></button>
-//             <button onclick="showSection('syllabus-section')">📚<span>Syllabus</span></button>
-//             <button onclick="showSection('notes-section')">📝<span>Notes</span></button>
-//             <button onclick="showSection('lectures-section')">📺<span>Lectures</span></button>
-//             <button onclick="showSection('pyq-section')">📄<span>PYQs</span></button>
-//         `;
-//         container.appendChild(bottomNav);
-
-//     } else {
-//         // Remove overlay
-//         if (overlay) overlay.remove();
-//         // Remove bottom nav
-//         const existing = document.getElementById('mobile-bottom-nav');
-//         if (existing) existing.remove();
-//     }
-// };
 
 // Close menu if user clicks outside
 window.onclick = function (event) {

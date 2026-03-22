@@ -47,7 +47,6 @@
     <div class="auth-container" id="login-screen">
         <div class="login-card">
             <div class="login-visual">
-                <!-- <h1>Welcome to doveTail!</h1> -->
                 <p>Log in to access your personalized study vault.</p>
             </div>
             <div class="login-form">
@@ -85,6 +84,10 @@
                     <option value="4">Semester 4</option>
                     <option value="5">Semester 5</option>
                     <option value="6">Semester 6</option>
+                    <option value="7">Semester 7</option>
+                    <option value="8">Semester 8</option>
+                    <option value="9">Semester 9</option>
+                    <option value="10">Semester 10</option>
                 </select>
             </div>
 
@@ -103,7 +106,7 @@
             <ul>
                 <li class="active" onclick="showSection('dashboard-section')">📊 Dashboard</li>
                 <li onclick="showSection('syllabus-section')">📚 View Syllabus</li>
-                <li onclick="showSection('notes-section')">📝 Skim through Notes</li>
+                <li onclick="showSection('notes-section')">📝 Notes</li>
                 <li onclick="showSection('lectures-section')">📺 Binge Lectures</li>
                 <li onclick="showSection('pyq-section')">📄 PYQs</li>
             </ul>
@@ -193,12 +196,27 @@
                             <option value="System Analysis and Design">System Analysis and Design</option>
                             <option value="General English-I"> General English-I</option>
                             <option value="General English-II"> General English-II</option>
+                            <option value="General English-III"> General English-III</option>
+                            <option value="General English-IV"> General English-IV</option>
+                            <option value="Political Science"> Political Science</option>
                             <option value="Political Science-I"> Political Science-I</option>
                             <option value="Political Science-II"> Political Science-II</option>
+                            <option value="Political Science-III"> Political Science-III</option>
+                            <option value="Political Science-IV"> Political Science-IV</option>
                             <option value="Sociology-I"> Sociology-I</option>
                             <option value="Sociology-II"> Sociology-II</option>
                             <option value="Economics-I"> Economics-I</option>
+                            <option value="Economics-II"> Economics-II</option>
                             <option value="Indian History-I"> Indian History-I</option>
+                            <option value="Indian History-II"> Indian History-II</option>
+                            <option value="Law and Media"> Law and Media</option>
+                            <option value="Law and Media-II"> Law and Media-II</option>
+                            <option value="Law of Torts and Consumer protection"> Law of Torts and Consumer protection
+                            </option>
+                            <option value="Law of Human Rights"> Law of Human Rights</option>
+                            <option value="Indian Legal and Constitutional History"> Indian Legal and Constitutional
+                                History</option>
+                            <option value="Contract-I"> Contract-I</option>
                         </select>
                         <input type="number" id="months-input-roadmap" placeholder="Months?" style="flex: 1;">
                     </div>
@@ -261,13 +279,21 @@
             <div id="about-section" class="tab-content hidden">
                 <h1>About DoveTail! ✨</h1>
                 <div class="glass-card-no-center">
-                    <p>Dovetail was born from a simple realization: learning shouldn't feel like a search mission.</p>
+                    <p>DoveTail was born from a very real frustration — not the studying itself, but everything around
+                        it. Finding the right playlist, hunting down notes, and the semester-end scramble for PYQs. It
+                        was a lot of unnecessary noise before the actual work even began.
+                        So we built DoveTail. One place for everything that matters — your notes, your lectures, your
+                        question papers. No more switching between drives, groups and random links. Just open, study,
+                        done.</p>
                     <ul style="margin-top: 20px;"></ul>
                     <h3>Future Updates:</h3>
                     <ul>
-                        <li>...</li>
-                        <li>AI-powered Study Summaries</li>
-                        <li>...</li>
+                        <li>AI Study Assistant- From generating personalized study plans to answering doubts and
+                            summarizing topics, an integrated AI built strictly for academic purposes</li>
+                        <li>Search Bar- Find notes, lectures and PYQs instantly without scrolling through everything.
+                        </li>
+                        <li>Student Chat Room- A space for students to discuss, collaborate and help each other.</li>
+                        <li>Feedback Portal</li>
                     </ul>
                 </div>
             </div>
