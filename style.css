@@ -852,3 +852,176 @@ body.light-mode .vault-column {
     animation-delay: 1.9s;
     font-size: 1.2rem;
 }
+
+
+/* 11. RESPONSIVE  DESIGN FOR MOBILE VIEW*/
+@media (max-width: 768px) {
+
+    /* HERO SECTION */
+    .hero-section {
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+        padding: 40px 20px;
+        gap: 10px;
+    }
+
+    .hero-image-wrapper {
+        display: none;
+    }
+
+    .hero-text h1 {
+        font-size: 2.2rem;
+    }
+
+    .accent-text {
+        font-size: 2rem;
+    }
+
+    /* INTRO SECTION */
+    .intro-section {
+        margin: 40px auto;
+        padding: 0 15px;
+    }
+
+    .intro-text {
+        font-size: 0.95rem;
+    }
+
+    /* LOGIN CARD */
+    .login-card {
+        flex-direction: column;
+        width: 90%;
+        height: auto;
+    }
+
+    .login-visual {
+        padding: 20px;
+        min-height: 100px;
+    }
+
+    .login-form {
+        padding: 25px 20px;
+    }
+
+    /* SETUP SCREEN */
+    .glass-card {
+        width: 90%;
+        padding: 25px 20px;
+    }
+
+    .setup-row {
+        flex-direction: column;
+    }
+
+    /* DASHBOARD LAYOUT */
+    .container {
+        flex-direction: column;
+        height: auto;
+        position: relative;
+        overflow-y: auto;
+    }
+
+    /* HIDE SIDEBAR */
+    .sidebar {
+        display: none;
+    }
+
+    /* MAIN CONTENT */
+    .main-content {
+        padding: 20px 15px 100px 15px;
+        height: auto;
+        overflow-y: visible;
+    }
+
+    /* BOTTOM NAV FOR MOBILE */
+    .mobile-nav {
+        display: flex !important;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: #0f172a;
+        border-top: 1px solid var(--border);
+        justify-content: space-around;
+        align-items: center;
+        padding: 10px 0;
+        z-index: 99999;
+    }
+
+    .mobile-nav button {
+        background: none;
+        border: none;
+        color: var(--text-dim);
+        font-size: 1.2rem;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+    }
+
+    .mobile-nav button span {
+        font-size: 0.6rem;
+        color: var(--text-dim);
+    }
+
+    .mobile-nav button:hover,
+    .mobile-nav button:hover span {
+        color: var(--accent-purple);
+    }
+
+    /* PROFILE BAR */
+    .profile-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    /* TASK INPUTS */
+    .task-inputs {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .task-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    /* VAULT SPLIT */
+    .vault-split {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+
+    .vault-column {
+        height: 300px;
+    }
+
+    /* PLAYLIST GRID */
+    #playlist-container {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* NOTES & PYQ GRID */
+    #notes-list,
+    #pyq-display {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* SYLLABUS */
+    .glass-card-no-center {
+        padding: 15px;
+    }
+
+    /* STATS GRID */
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* ROADMAP */
+    #roadmap-container {
+        font-size: 0.9rem;
+    }
+}
