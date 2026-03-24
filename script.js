@@ -606,35 +606,19 @@ window.handleSyllabusAction = async function (mode) {
     } else {
         if (!months || months < 1) return alert("How many months do you have to study?");
 
-        container.innerHTML = `
-        <div style="text-align: center; padding: 30px; color: #a78bfa;">
-            <p style="font-size: 1.2rem;">🤖 Generating your AI study plan...</p>
-            <p style="font-size: 0.9rem; color: #64748b; margin-top: 10px;">This may take a few seconds!</p>
-        </div>`;
+        const totalWeeks = months * 4;
+        const topicsPerWeek = (allTopics.length / totalWeeks).toFixed(1);
 
-        try {
-            const response = await fetch('/.netlify/functions/generate-plan', {
-                method: 'POST',
-                body: JSON.stringify({
-                    topics: allTopics,
-                    months: months
-                })
-            });
+        container.innerHTML += `<p style="color: #818cf8; margin-bottom:15px;">Plan: ${topicsPerWeek} topics/week over ${totalWeeks} weeks.</p>`;
 
-            const data = await response.json();
-
-            container.innerHTML = `
-            <div style="white-space: pre-wrap; color: white; line-height: 1.8; padding: 10px;">
-                ${data.plan}
+        allTopics.forEach((t, i) => {
+            const weekNum = Math.floor(i / Math.ceil(allTopics.length / totalWeeks)) + 1;
+            container.innerHTML += `
+            <div class="plan-card" style="background: rgba(255,255,255,0.05); margin: 5px 0; padding: 10px; border-radius: 8px;">
+                <small style="color: #a78bfa;">WEEK ${weekNum}</small>
+                <p>${t}</p>
             </div>`;
-
-            const btn = document.getElementById('download-btn');
-            if (btn) btn.style.display = 'block';
-
-        } catch (err) {
-            container.innerHTML = "<p style='color: red;'>Failed to generate plan. Try again!</p>";
-            console.error(err);
-        }
+        });
     }
 
     const btn = document.getElementById('download-btn');
