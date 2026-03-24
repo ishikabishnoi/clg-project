@@ -22,10 +22,14 @@ export async function handler(event) {
 
     const data = await response.json();
 
+    console.log("please wait...", JSON.stringify(data));
+
+    const planText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
     return {
         statusCode: 200,
         body: JSON.stringify({
-            plan: data.candidates[0].content.parts[0].text
+            plan: planText || "Could not generate plan. Try again!"
         })
     };
 }
