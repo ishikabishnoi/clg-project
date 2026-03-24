@@ -1,35 +1,43 @@
 export async function handler(event) {
-    const { topics, months } = JSON.parse(event.body);
+    try {
+        const { topics, months } = JSON.parse(event.body);
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            contents: [{
-                parts: [{
-                    text: `I have these topics to study: ${topics.join(", ")}. 
-                    I have ${months} months to study them.
-                    Create a simple week-wise study plan.
-                    Group related topics together where possible.
-                    Format it clearly, week by week.
-                    Keep it simple and practical.`
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`;
+
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{
+                        text: `Create a simple week by week study plan for these topics: ${topics.join(", ")}. I have ${months} months. Group related topics together. Keep it simple.`
+                    }]
                 }]
-            }]
-        })
-    });
+            })
+        });
 
-    const data = await response.json();
+        const data = await response.json();
 
-    console.log("please wait...", JSON.stringify(data));
+        if (data.error) {
+            return {
+                statusCode: 200,
+                body: JSON.stringify({ plan: "Gemini Error: " + data.error.message })
+            };
+        }
 
-    const planText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        const planText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
-    return {
-        statusCode: 200,
-        body: JSON.stringify({
-            plan: planText || "Could not generate plan. Try again!"
-        })
-    };
+        return {
+            statusCode: 200,
+            body: JSON.stringify({ plan: planText || "No plan generated!" })
+        };
+
+    } catch (err) {
+        return {
+            statusCode: 200,
+            body: JSON.stringify({ plan: "Error: " + err.message })
+        };
+    }
 }
