@@ -47,7 +47,7 @@
     <div class="auth-container" id="login-screen">
         <div class="login-card">
             <div class="login-visual">
-                <p>Log in to access your personalized study vault.</p>
+                <p>Log in to access your personalized study space.</p>
             </div>
             <div class="login-form">
                 <h2>User Login</h2>
@@ -65,7 +65,7 @@
 
     <div id="setup-screen" class="full-page-center hidden">
         <div class="glass-card">
-            <h1>Setup your profile 📚</h1>
+            <h1>Setup your profile </h1>
             <input type="email" id="signup-email" placeholder="Email Address">
             <input type="password" id="signup-password" placeholder="Create Password">
 
@@ -142,7 +142,7 @@
 
                 <div class="card task-manager-card">
                     <div class="task-header">
-                        <h3>📅 Upcoming Deadlines & Tasks</h3>
+                        <h3> Upcoming Deadlines & Tasks</h3>
                         <div class="task-inputs">
                             <input type="text" id="task-name" placeholder="Assignment/Task name...">
                             <input type="date" id="task-date">
@@ -163,7 +163,7 @@
             </div>
 
             <div id="syllabus-section" class="tab-content hidden">
-                <h1>Syllabus Planner 📚</h1>
+                <h1>Syllabus Planner </h1>
                 <div class="glass-card-no-center">
                     <div style="display: flex; gap: 10px; margin-bottom: 20px;">
                         <select id="subject-select" style="flex: 2;">
@@ -217,26 +217,28 @@
                             <option value="Indian Legal and Constitutional History"> Indian Legal and Constitutional
                                 History</option>
                             <option value="Contract-I"> Contract-I</option>
+
                         </select>
                         <input type="number" id="months-input-roadmap" placeholder="Months?" style="flex: 1;">
+                        <input type="number" id="hours-input-roadmap" placeholder="Hours/Day?" style="flex: 1;">
                     </div>
                     <div style="display: flex; gap: 10px;">
                         <button class="add-btn" style="flex: 1; background: #334155;"
-                            onclick="handleSyllabusAction('view')">👁️ View</button>
-                        <button class="add-btn" style="flex: 1;" onclick="handleSyllabusAction('plan')">📅 Generate
+                            onclick="handleSyllabusAction('view')">View</button>
+                        <button class="add-btn" style="flex: 1;" onclick="handleSyllabusAction('plan')"> Generate
                             Plan</button>
                     </div>
                     <div id="roadmap-container" style="margin-top:30px;"></div>
                     <button id="download-btn" class="add-btn"
                         style="display: none; margin-top: 20px; width: 100%; background: #10b981;"
                         onclick="downloadPlanner()">
-                        📥 Download Study Plan (PDF)
+                        Download Study Plan (PDF)
                     </button>
                 </div>
             </div>
 
             <div id="notes-section" class="tab-content hidden">
-                <h1>Subject Wise Notes 📝</h1>
+                <h1>Subject Wise Notes</h1>
                 <div class="glass-card-no-center">
                     <h3>Upload New Study Material</h3>
                     <div style="display: flex; gap: 10px; margin: 15px 0;">
@@ -250,7 +252,7 @@
             </div>
 
             <div id="lectures-section" class="tab-content hidden">
-                <h1>Binge Lectures 📺</h1>
+                <h1>Binge Lectures </h1>
                 <div class="glass-card-no-center">
                     <div style="display: flex; gap: 10px; margin-bottom: 20px;">
                         <input type="text" id="playlist-title" placeholder="Topic Name" style="flex: 2;">
@@ -263,7 +265,7 @@
             </div>
 
             <div id="pyq-section" class="tab-content hidden">
-                <h1>Previous Year Questions 📄</h1>
+                <h1>Previous Year Questions</h1>
                 <div class="glass-card-no-center">
                     <h3>Upload Question Paper Link</h3>
                     <div style="display: flex; gap: 10px; margin-top: 15px;">
@@ -277,7 +279,7 @@
             </div>
 
             <div id="about-section" class="tab-content hidden">
-                <h1>About DoveTail! ✨</h1>
+                <h1>About DoveTail!</h1>
                 <div class="glass-card-no-center">
                     <p>It started with a pretty simple observation, studying wasn't the hard part. Finding everything
                         you needed to study was.
@@ -292,10 +294,11 @@
                         <h4>Why DoveTail?</h4>
                         <ul style="margin-top: 10px;"></ul>
                         <p>
-                            In craftsmanship, a Dovetail is the strongest way to join two separate
-                            pieces into one seamless, unbreakable whole.
-                            We do the same for your studies. We take your scattered resources and your schedule, and we
-                            lock them together into one simple, fast workspace.
+                            In craftsmanship, a dovetail is the strongest way to join two pieces into
+                            one unbreakable whole. We chose this name because we tried doing the same for your studies-
+                            we take
+                            your scattered resources and your schedule, locking them into one seamless, high speed
+                            workspace.
                         </p>
                     </div>
                     <ul style="margin-top: 20px;"></ul>
@@ -318,12 +321,12 @@
                 <div class="vault-split">
 
                     <div class="vault-column">
-                        <h4><span class="emoji">⭐</span> Saved Playlists</h4>
+                        <h4><span class="emoji">📺</span> Saved Playlists</h4>
                         <div id="saved-lectures"></div>
                     </div>
 
                     <div class="vault-column">
-                        <h4><span class="emoji">📄</span> Saved Notes</h4>
+                        <h4><span class="emoji">📝</span> Saved Notes</h4>
                         <div id="saved-notes"></div>
                     </div>
 
@@ -340,7 +343,7 @@
             <button onclick="showSection('syllabus-section')">📚<span>Syllabus</span></button>
             <button onclick="showSection('notes-section')">📝<span>Notes</span></button>
             <button onclick="showSection('lectures-section')">📺<span>Lectures</span></button>
-            <button onclick="showSection('pyq-section')">📄<span>PYQs</span></button>
+            <button onclick="showSection('pyq-section')">📁<span>PYQs</span></button>
         </nav>
     </div>
     <script type="module" src="script.js"></script>

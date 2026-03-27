@@ -574,15 +574,17 @@ async function fetchPlaylistsFromCloud() {
 window.handleSyllabusAction = async function (mode) {
     const subject = document.getElementById('subject-select').value;
     const months = document.getElementById('months-input-roadmap').value;
+    const hours = parseFloat(document.getElementById('hours-input-roadmap').value);
     const container = document.getElementById('roadmap-container');
 
     if (!subject || subject === "Select Subject") return alert("Pick a subject!");
 
     container.innerHTML = "<p>Fetching from Cloud... ☁️</p>";
 
+    // 1. Get the data your teammates entered
     const { data: rawData, error } = await supabase
         .from('master_syllabus')
-        .select('topic')
+        .select('topic, subject')
         .eq('subject', subject);
 
     if (error || !rawData || rawData.length === 0) {
@@ -590,9 +592,9 @@ window.handleSyllabusAction = async function (mode) {
         return;
     }
 
+    // 2. Turn that data into a clean list of topics
     let allTopics = [];
     rawData.forEach(row => {
-        // Splits by commas OR new lines, then cleans up extra spaces
         const splitItems = row.topic.split(/,|\n/).map(t => t.trim()).filter(t => t !== "");
         allTopics = allTopics.concat(splitItems);
     });
@@ -600,23 +602,35 @@ window.handleSyllabusAction = async function (mode) {
     container.innerHTML = `<h3>${subject}</h3>`;
 
     if (mode === 'view') {
+        // --- SIMPLE VIEW ---
         allTopics.forEach(t => {
             container.innerHTML += `<div class="syllabus-item" style="padding:10px; border-bottom:1px solid #444;">📖 ${t}</div>`;
         });
     } else {
+        // --- SMART PLAN ---
         if (!months || months < 1) return alert("How many months do you have to study?");
 
         const totalWeeks = months * 4;
-        const topicsPerWeek = (allTopics.length / totalWeeks).toFixed(1);
+        const topicsPerWeek = Math.ceil(allTopics.length / totalWeeks);
 
-        container.innerHTML += `<p style="color: #818cf8; margin-bottom:15px;">Plan: ${topicsPerWeek} topics/week over ${totalWeeks} weeks.</p>`;
+        container.innerHTML += `<p style="color: #818cf8; margin-bottom:15px;">Plan: ~${topicsPerWeek} topics/week over ${totalWeeks} weeks.</p>`;
+
+        // Identify if this is a "Heavy" subject automatically
+        const isIntensive = subject.toLowerCase().includes('math') ||
+            subject.toLowerCase().includes('programming') ||
+            subject.toLowerCase().includes('physics');
 
         allTopics.forEach((t, i) => {
-            const weekNum = Math.floor(i / Math.ceil(allTopics.length / totalWeeks)) + 1;
+            const weekNum = Math.floor(i / topicsPerWeek) + 1;
+
+            // Only show the nudge for the first topic of the week to keep it clean
+            const showNudge = isIntensive && hours < 2 && (i % topicsPerWeek === 0);
+
             container.innerHTML += `
-            <div class="plan-card" style="background: rgba(255,255,255,0.05); margin: 5px 0; padding: 10px; border-radius: 8px;">
-                <small style="color: #a78bfa;">WEEK ${weekNum}</small>
-                <p>${t}</p>
+            <div class="plan-card" style="background: rgba(255,255,255,0.05); margin: 10px 0; padding: 12px; border-radius: 8px; border-left: 4px solid #6a5af9;">
+                <small style="color: #a78bfa; font-weight: bold;">WEEK ${weekNum}</small>
+                <p style="margin: 5px 0;">${t}</p>
+                ${showNudge ? `<div style="color:#fbbf24; font-size:0.7rem; margin-top:5px;">💡 <i>Intensive topic! Try for 2+ hours today.</i></div>` : ''}
             </div>`;
         });
     }
@@ -624,7 +638,6 @@ window.handleSyllabusAction = async function (mode) {
     const btn = document.getElementById('download-btn');
     if (btn) btn.style.display = (mode === 'plan') ? 'block' : 'none';
 };
-
 
 // This connects your HTML button to your JS function
 document.getElementById('login-btn').addEventListener('click', () => {
