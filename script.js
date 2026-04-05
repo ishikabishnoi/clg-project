@@ -32,45 +32,6 @@ window.signUpUser = async function signUpUser() {
     }
 }
 
-// LOGIN FUNCTION
-// window.loginUser = async function loginUser() {
-//     const email = document.getElementById('login-email').value;
-//     const password = document.getElementById('login-password').value;
-
-//     if (!email || !password) return alert("Please enter email and password");
-
-//     const { data, error } = await supabase.auth.signInWithPassword({
-//         email: email,
-//         password: password,
-//     });
-
-//     if (error) return alert("Login failed: " + error.message);
-
-//     if (data.user) {
-//         currentUser = data.user;
-
-//         const { data: profile, error: pError } = await supabase
-//             .from('profiles')
-//             .select('course, semester')
-//             .eq('id', currentUser.id)
-//             .single();
-
-//         if (profile) {
-//             window.userCourse = profile.course;
-//             window.userSemester = profile.semester;
-//         } else {
-//             // Fallback if profile table is empty for this user
-//             window.userCourse = "Student";
-//             window.userSemester = "New";
-//         }
-
-//         await fetchPlaylistsFromCloud();
-//         await fetchNotesFromCloud();
-//         await fetchPYQsFromCloud();
-//         showDashboard();
-//     }
-// }
-
 window.loginUser = async function loginUser() {
     const email = document.getElementById('login-email').value;
     const password = document.getElementById('login-password').value;
@@ -81,6 +42,9 @@ window.loginUser = async function loginUser() {
     const loginBtn = document.getElementById('login-btn');
     loginBtn.innerText = "Logging in...";
     loginBtn.disabled = true;
+
+    loginBtn.style.background = "white";
+    loginBtn.style.color = "black";
 
     const { data, error } = await supabase.auth.signInWithPassword({
         email: email,
@@ -98,7 +62,7 @@ window.loginUser = async function loginUser() {
         currentUser = data.user;
 
         // Update button to show fetching state
-        loginBtn.innerText = "Fetching your vault...";
+        //loginBtn.innerText = "Fetching your vault...";
 
         const { data: profile, error: pError } = await supabase
             .from('profiles')
