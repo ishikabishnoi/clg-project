@@ -20,7 +20,7 @@
                 <h1>STOP JUGGLING.</h1>
                 <h2 class="accent-text">START DOVETAILING!</h2>
                 <div class="scroll-indicator">
-                    <span>Scroll to Enter Vault</span>
+                    <span>Scroll to Enter</span>
                     <div class="arrow">↓</div>
                 </div>
             </div>
@@ -91,7 +91,7 @@
                 </select>
             </div>
 
-            <button onclick="signUpUser()" class="add-btn" style="width:100%;">Enter Vault</button>
+            <button onclick="signUpUser()" class="add-btn" style="width:100%;">click me!</button>
             <p style="font-size: 0.8rem; cursor:pointer;" onclick="toggleAuth()">Back to Login</p>
         </div>
     </div>
@@ -260,11 +260,11 @@
                 <h1>Subject Wise Notes</h1>
                 <div class="glass-card-no-center">
                     <h3>Upload New Study Material</h3>
-                    <div style="display: flex; gap: 10px; margin: 15px 0;">
+                    <div style="display: flex; gap: 10px; margin: 15px 0; align-items: center;">
                         <input type="text" id="note-subject" placeholder="Subject Name" style="flex: 2;">
                         <input type="file" id="note-file" style="flex: 2;">
+                        <button class="add-btn" onclick="addNoteLink()">Add to library</button>
                     </div>
-                    <button class="add-btn" onclick="addNoteLink()" style="width:100%;">Add to Vault</button>
                     <ul id="notes-list" style="list-style: none; margin-top: 20px; padding: 0;">
                     </ul>
                 </div>
@@ -276,7 +276,7 @@
                     <div style="display: flex; gap: 10px; margin-bottom: 20px;">
                         <input type="text" id="playlist-title" placeholder="Topic Name" style="flex: 2;">
                         <input type="text" id="playlist-url" placeholder="YouTube Link" style="flex: 3;">
-                        <button class="add-btn" onclick="addPlaylist()">Save</button>
+                        <button class="add-btn" onclick="addPlaylist()">Add to library</button>
                     </div>
                     <div id="playlist-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                     </div>
@@ -286,12 +286,11 @@
             <div id="pyq-section" class="tab-content hidden">
                 <h1>Previous Year Questions</h1>
                 <div class="glass-card-no-center">
-                    <h3>Upload Question Paper Link</h3>
                     <div style="display: flex; gap: 10px; margin-top: 15px;">
                         <input type="text" id="pyq-subject-input" placeholder="Subject Name" style="flex: 2;">
                         <input type="text" id="pyq-link-input" placeholder="Paste Google Drive Link..."
                             style="flex: 3;">
-                        <button onclick="savePYQLink()" class="add-btn" style="flex: 1;">Save Link</button>
+                        <button onclick="savePYQLink()" class="add-btn" style="flex: 1;">Add to library</button>
                     </div>
                     <div id="pyq-display" style="margin-top: 20px;"></div>
                 </div>
@@ -335,7 +334,7 @@
             </div>
 
             <div id="profile-section" class="tab-content hidden">
-                <h1>My Study Vault 👤</h1>
+                <h1>Personalised library👤</h1>
 
                 <div class="vault-split">
 

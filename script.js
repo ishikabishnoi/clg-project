@@ -304,7 +304,7 @@ window.addNoteLink = async function addNoteLink() {
     if (!subject || fileInput.files.length === 0) return alert("Select a file first!");
 
     const file = fileInput.files[0];
-    const fileName = `${Date.now()}_${file.name}`; // Better naming than Math.random()
+    const fileName = `${Date.now()}_${file.name}`;
 
     try {
         // 1. Upload to Storage
@@ -321,20 +321,20 @@ window.addNoteLink = async function addNoteLink() {
 
         const publicUrl = urlData.publicUrl;
 
-        // 3. Insert into Table (Force is_public to true)
+        // 3. Insert into Table 
         const { error: dbError } = await supabase
             .from('notes_vault')
             .insert([{
                 subject: subject,
                 file_name: file.name,
-                file_url: publicUrl, // Saving the full https:// link
+                file_url: publicUrl,
                 user_id: currentUser.id,
-                is_public: true // Force public
+                is_public: true
             }]);
 
         if (dbError) throw dbError;
 
-        alert("Note saved to Vault! ✨");
+        alert("Notes saved in library! ");
 
         // Clear inputs
         document.getElementById('note-subject').value = '';
@@ -420,12 +420,11 @@ showSection = function (sectionId) {
 
 
 function getYoutubeID(url) {
-    // This looks for 'v=' (video) or 'list=' (playlist)
     const vidMatch = url.match(/[?&]v=([^&#]+)/);
     const listMatch = url.match(/[?&]list=([^&#]+)/);
 
     if (vidMatch) return vidMatch[1];
-    if (listMatch) return listMatch[1]; // Returns the playlist ID
+    if (listMatch) return listMatch[1];
     return null;
 }
 
@@ -453,7 +452,7 @@ window.addPlaylist = async function () {
 
         if (error) throw error;
 
-        alert("Playlist saved to Vault! ✨");
+        alert("Playlist saved in library!");
         document.getElementById('playlist-title').value = '';
         document.getElementById('playlist-url').value = '';
 
@@ -501,13 +500,11 @@ function renderSimpleList(data, subject) {
 }
 
 function renderSmartPlanner(data, subject, months) {
-    // Math: Total topics divided by (months * 4 weeks)
     const topicsPerWeek = Math.ceil(data.length / (months * 4));
 
     let html = `<h3>${months}-Month Plan for ${subject}</h3>`;
     html += `<p style="color: #6366f1;">Target: ${topicsPerWeek} topics per week</p><br>`;
 
-    // Your existing week-grouping logic goes here...
     document.getElementById('roadmap-container').innerHTML = html + "(Plan items rendered here)";
 }
 
@@ -535,10 +532,10 @@ window.toggleAuth = function () {
 }
 
 async function fetchNotesFromCloud() {
-    if (!currentUser) return; // Safety check
+    if (!currentUser) return;
 
     const { data, error } = await supabase
-        .from('notes_vault') // FIXED: Matches your addNoteLink table name
+        .from('notes_vault')
         .select('*')
         .or(`user_id.eq.${currentUser.id},is_public.eq.true`);
 
@@ -574,7 +571,7 @@ async function fetchPlaylistsFromCloud() {
 
     const { data, error } = await supabase
         .from('playlists')
-        .select('*'); // This pulls EVERYTHING from the table
+        .select('*');
 
     if (error) {
         console.error("Error fetching playlists:", error);
@@ -593,7 +590,7 @@ window.handleSyllabusAction = async function (mode) {
 
     if (!subject || subject === "Select Subject") return alert("Pick a subject!");
 
-    container.innerHTML = "<p>Fetching from Cloud... ☁️</p>";
+    container.innerHTML = "<p>Fetching from Cloud...☁️</p>";
 
     // 1. Get the data your teammates entered
     const { data: rawData, error } = await supabase
@@ -602,7 +599,7 @@ window.handleSyllabusAction = async function (mode) {
         .eq('subject', subject);
 
     if (error || !rawData || rawData.length === 0) {
-        container.innerHTML = "<p>No syllabus found. Check your DB spelling!</p>";
+        container.innerHTML = "<p>No syllabus found.</p>";
         return;
     }
 
@@ -750,7 +747,7 @@ function updateProfileVault() {
     if (userData) {
         // Update the Profile Section Header
         const profileHeader = document.querySelector('#profile-section h1');
-        profileHeader.innerText = `${userData.email.split('@')[0]}'s Study Vault 👤`;
+        profileHeader.innerText = `${userData.email.split('@')[0]}'s Personalised Library 👤`;
 
         // Sync the playlists and notes from the main sections to the profile cards
         document.getElementById('saved-lectures').innerHTML = document.getElementById('playlist-container').innerHTML;
@@ -799,7 +796,7 @@ window.savePYQLink = async function () {
         if (error) throw error;
 
         localStorage.setItem('pyq_drive_link', link);
-        alert("Drive link synced to Vault! 🔗");
+        alert("Drive link synced to library!");
 
         // Clear inputs
         document.getElementById('pyq-link-input').value = '';
@@ -869,12 +866,12 @@ async function fetchPYQsFromCloud() {
 window.saveToVault = async function (id, type) {
     // 1. Basic check to ensure we have an ID
     if (!id || id === 'undefined') {
-        alert("Item ID missing. Try refreshing the page! 🔄");
+        alert("Item ID missing. Try refreshing the page!");
         return;
     }
 
     if (!currentUser) {
-        alert("Login first to save this to your Vault! 🔑");
+        alert("Login first to save this to library!");
         return;
     }
 
@@ -891,12 +888,12 @@ window.saveToVault = async function (id, type) {
         if (error) {
             // Check if it's a duplicate bookmark error
             if (error.code === '23505') {
-                alert("Already in your Study Vault! ✨");
+                alert("Already in your personalised library! ✨");
             } else {
                 throw error;
             }
         } else {
-            alert("Saved to your Study Vault! 🔖");
+            alert("Saved to your personalised library! 🔖");
             // If you have a profile view open, refresh it
             if (typeof updateProfileVault === "function") updateProfileVault();
         }
@@ -1020,7 +1017,7 @@ window.removeBookmark = async function (itemId, itemType) {
     if (error) {
         alert("Error removing: " + error.message);
     } else {
-        alert("Removed from your Vault! 🗑️");
-        syncVault(); // Refresh the vault view
+        alert("Removed from your library!");
+        syncVault();
     }
 };
