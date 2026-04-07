@@ -705,13 +705,17 @@ function renderTasks() {
     `).join('');
 }
 
-// Update showDashboard to fill the Profile Bar
+
 const originalShowDashboard = window.showDashboard;
 window.showDashboard = function () {
     originalShowDashboard(); // Keep your existing logic
 
-    // Update Profile Bar
-    document.getElementById('user-display-name').innerText = currentUser.email.split('@')[0]; // Simple name from email
+    const name = currentUser.email.split('@')[0];
+    document.getElementById('user-display-name').innerText = name;
+
+    // Add this new line
+    const firstLetter = name[0].toUpperCase();
+    document.getElementById('user-avatar-circle').innerText = firstLetter;
     document.getElementById('user-display-meta').innerText = `${window.userCourse} - Semester ${window.userSemester}`;
 
     saveAndRenderTasks();

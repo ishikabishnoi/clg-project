@@ -1025,3 +1025,38 @@ body.light-mode .vault-column {
         font-size: 0.9rem;
     }
 }
+
+.user-avatar {
+    font-size: 1.5rem;
+    background: linear-gradient(to right, var(--accent-purple), var(--accent-pink));
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+}
+
+body.light-mode .card {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+body.light-mode .card p {
+    color: #1e293b !important;
+}
+
+body.light-mode .card h3,
+body.light-mode .card h4 {
+    color: #1e293b !important;
+}
+
+body.light-mode .main-content {
+    background: #f8fafc !important;
+}
+
+body.light-mode .menu-trigger {
+    color: #1e293b !important;
+}
